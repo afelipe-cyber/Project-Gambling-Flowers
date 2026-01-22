@@ -1,6 +1,6 @@
-# Modèle
+# Comment constituer votre dossier technique ?
 
-## Documenter son projet
+## Nommer son dossier technique
 
 Le répertoire racine du projet doit respecter la dénomination suivante : 
 
@@ -8,13 +8,13 @@ Le répertoire racine du projet doit respecter la dénomination suivante :
 
 L'ID d'un projet est unique. Il est fourni lors de la création d'un nouveau projet sur la plateforme de dépôt : https://depot.trophees-nsi.fr/
 
------------------
+## La nomenclature à respecter
 
 Le dossier technique doit contenir les éléments précisés ci-dessous, en respectant cette même nomenclature :
 
 - un fichier presentation.md,
 - un fichier README.md,
-- un fichier ~licence.txt~ LICENSE,
+- un fichier LICENSE,
 - un fichier requirements.txt,
 - un répertoire sources,
 
@@ -25,7 +25,7 @@ Selon la dimension et la nature du projet, vous pouvez également ajouter les r�
 - un répertoire test,
 - un répertoire exemples.
 
------------------
+## Les fichiers et répertoires à fournir
 
 ### Le fichier presentation.md
 
