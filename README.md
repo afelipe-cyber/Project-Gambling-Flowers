@@ -1,6 +1,7 @@
-# Titre du projet
+# GROW A GARDEN (titre temporaire)
 
-Une petite description du projet
+Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette argent il pourra faire des tirages sur une bannière de graine et acheter des arrosoirs pour arroser les plantes.
+
 
 ## Pour commencer
 
