@@ -1,6 +1,6 @@
 # GROW A GARDEN (titre temporaire)
 
-Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette argent il pourra faire des tirages sur une bannière de graine et acheter des arrosoirs pour arroser les plantes.
+Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette argent il pourra faire des tirages sur une bannière de graine et/ou acheter des arrosoirs pour arroser les plantes, quand on a une graine, on pouura la planter dans un petit jardin.
 
 Quand la plante a fini de grandir, on pourra récolter cette plante, puis vendre cette plante pour gagner de l'argent pour essayer d'obtenier d'autres plantes plus rare.
 
