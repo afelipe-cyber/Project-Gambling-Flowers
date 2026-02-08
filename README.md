@@ -4,6 +4,8 @@ Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette ar
 
 Quand la plante a fini de grandir, on pourra récolter cette plante, puis vendre cette plante pour gagner de l'argent pour essayer d'obtenier d'autres plantes plus rare.
 
+On peut utiliser les plantes pour invoquer des boss, les vaincre et terminer le jeu.
+
 ## Pour commencer
 
 Entrez ici les instructions pour bien débuter avec votre projet...
