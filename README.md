@@ -1,4 +1,4 @@
-# GROW A GARDEN (titre temporaire)
+# GAMBLING FLOWERS
 
 Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette argent il pourra faire des tirages sur une bannière de graine et/ou acheter des arrosoirs pour arroser les plantes, quand on a une graine, on pourra la planter dans un petit jardin.
 
