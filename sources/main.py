@@ -1,8 +1,10 @@
 
+# Fix for ursina importlib.util compatibility issue
+from importlib.util import*
+
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-from inventaire import inv_input
-import pathfinding as pf
+from inventaire import*
 import PIL
 import time
 import random as rd

@@ -281,3 +281,18 @@ def _base_inv_input(key, subject, mouse):
         mouse.locked = True
 
 
+def inv_input(key, subject, mouse):
+    """Wrapper AZERTY pour l'inventaire."""
+    # Mapping AZERTY -> nombres 1-9
+    azerty_map = {
+        '&': '1', 'é': '2', '"': '3', "'": '4', '(': '5',
+        '-': '6', 'è': '7', '_': '8', 'ç': '9'
+    }
+    
+    # Convertir la touche AZERTY en nombre si nécessaire
+    if key in azerty_map:
+        key = azerty_map[key]
+    
+    _base_inv_input(key, subject, mouse)
+
+

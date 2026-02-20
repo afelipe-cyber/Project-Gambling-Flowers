@@ -42,7 +42,7 @@ class PNJ:
                 print("Vous n'avez pas assez de fleur ...")
         else:
             print(self.nom, "n'achaite pas de fleur ...")
-        if joueur.inventaire.objets.get(nom_objet) = 0:
+        if joueur.inventaire.objets.get(nom_objet) == 0:
             del joueur.inventaire[nom_objet]
             
     def afficher_inventaire(self):
