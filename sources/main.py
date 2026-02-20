@@ -1,11 +1,13 @@
 
 import ursina
 import ursina.prefabs.first_person_controller as fpc
+from inventaire import inv_input
 import pathfinding as pf
 import PIL
 import time
 import random as rd
 import pygame as pg
+
 
 app = ursina.Ursina()
 
@@ -23,10 +25,26 @@ for i in range(2):  # 2 zones en largeur
     for j in range(5):  # 5 zones en profondeur
         x = 20 + (i - 0.5) * 18
         z = 0 + (j - 2) * 15
-        zone = ursina.Entity(model='plane', scale=(18, 1, 15), position=(x, 0.01, z), 
-                           color=ursina.color.rgb(139/255, 69/255, 19/255), texture=None, collider='mesh')
+        zone = ursina.Entity(
+            model="plane",
+            scale=(18, 1, 15),
+            position=(x, 0.01, z),
+            color=ursina.color.rgb(139 / 255, 69 / 255, 19 / 255),
+            texture=None,
+            collider="mesh",
+        )
         zone.on_click = lambda z=zone: on_zone_click(z)
 
 player = fpc.FirstPersonController(y=100, scale=2, speed=20)
+
+
+def input(key):
+    try:
+        inv_input(key, player, fpc.mouse)
+    except Exception as e:
+        print("inv_input error:", e)
+
+
+
 
 app.run()
