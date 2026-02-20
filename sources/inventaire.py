@@ -255,12 +255,10 @@ Hotspot.toggle()
 Hotspot.toggle()
 
 # Texte "où suis-je ?".
-wai = Text("<black><bold>Nowhere", scale=2.4, position=(-0.8, 0.5))
 
 
 def _base_inv_input(key, subject, mouse):
     """Logique d'inventaire du tutoriel (sans wrapper AZERTY)."""
-    wai.text = f"<black><bold>east:{int(subject.x)}, north:{int(subject.z)}"
     try:
         wnum = int(key)
         if 0 < wnum < 10:
