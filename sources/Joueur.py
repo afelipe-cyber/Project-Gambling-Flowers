@@ -43,39 +43,39 @@ class Joueur:
             #si la rarete determinée est UR alors on créer un liste des fleurs de rareté UR
             for elem in fleurs:
                 if fleurs[elem][1] == 5:
-                pool_rarete.append(fleurs[elem])
+                    pool_rarete.append(fleurs[elem])
                 
         #objet de rarete SSR (9,7%)
         elif 37<pull_rarete<134:
 
             #si la rarete determinée est SSR alors on créer un liste des fleurs de rareté SSR
             for elem in fleurs:
-                elif fleurs[elem][1] == 4:
-                pool_rarete.append(fleurs[elem])
+                if fleurs[elem][1] == 4:
+                    pool_rarete.append(fleurs[elem])
                 
         #objet de rarete SR (18,9%)
         elif 134<pull_rarete<323:
 
             #si la rarete determinée est SR alors on créer un liste des fleurs de rareté SR
             for elem in fleurs:
-                elif fleurs[elem][1] == 3:
-                pool_rarete.append(fleurs[elem])
+                if fleurs[elem][1] == 3:
+                    pool_rarete.append(fleurs[elem])
                 
         #objet de rarete R (26,5%)
         elif 323<pull_rarete<588:
 
             #si la rarete determinée est R alors on créer un liste des fleurs de rareté R
             for elem in fleurs:
-                elif fleurs[elem][1] == 2:
-                pool_rarete.append(fleurs[elem])
+                if fleurs[elem][1] == 2:
+                    pool_rarete.append(fleurs[elem])
                 
         #objet de rarete C (41,2%)
         elif 588<pull_rarete<1000:
 
             #si la rarete determinée est C alors on créer un liste des fleurs de rareté C
             for elem in fleurs:
-                elif fleurs[elem][1] == 1:
-                pool_rarete.append(fleurs[elem])
+                if fleurs[elem][1] == 1:
+                    pool_rarete.append(fleurs[elem])
                 
         n=len(pool_rarete)
 
