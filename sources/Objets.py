@@ -79,7 +79,7 @@ class Graines:
     def __str__(self):
         return f"{self.nom} de rareté {self.rareté}"
     
-Graines = {
+graines = {
     "Cécilia": Graines("Graine de Cécilia", 0),
     "Dendrobium sanglant": Graines("Graine de Dendrobium sanglant", 0),
     "Chrysanthème": Graines("Graine de Chrysanthème", 0),
