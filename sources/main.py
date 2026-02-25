@@ -1,10 +1,11 @@
 
 # Fix for ursina importlib.util compatibility issue
-from importlib.util import*
+from importlib.util import *
 
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-from Inventaire import*
+# from inventaire import *
+from InventaireBIS import *
 import PIL
 import time
 import random as rd
@@ -100,11 +101,11 @@ stand_de_vente()
 #     print('Erreur lors du remplissage du panneau d\'inventaire :', e)
 
 
-def input(key):
-    try:
-        inv_input(key, player, fpc.mouse)
-    except Exception as e:
-        print("inv_input error:", e)
+# def input(key):
+#     try:
+#         inv_input(key, player, fpc.mouse)
+#     except Exception as e:
+#         print("inv_input error:", e)
 
 
 
