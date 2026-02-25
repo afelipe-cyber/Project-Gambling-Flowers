@@ -1,4 +1,6 @@
 from ursina import *
+from Objets import *
+
 
 class InventoryItem(Draggable):
     """Classe pour gérer un item unique de l'inventaire"""
@@ -8,10 +10,13 @@ class InventoryItem(Draggable):
         self.original_position = None
         self.stack = 1  # Nombre d'items dans cette pile
         
+        # Obtenir le chemin de texture depuis le dictionnaire
+        texture_path = texture_paths.get(item_name, item_name)
+        
         super().__init__(
             parent = parent,
             model = 'quad',
-            texture = item_name,
+            texture = texture_path,
             color = color.white,
             origin = (-.5, .5),
             z = -.5,
@@ -157,7 +162,7 @@ def main():
     inventory = Inventory()
     
     # Liste des items disponibles
-    available_items = ('bag', 'bow_arrow', 'gem', 'orb', 'sword')
+    available_items = list(fleurs.keys())
     
     def add_random_item():
         """Ajoute un item aléatoire à l'inventaire"""
