@@ -322,5 +322,3 @@ def inv_input(key, subject, mouse):
         key = azerty_map[key]
     
     _base_inv_input(key, subject, mouse)
-
-
