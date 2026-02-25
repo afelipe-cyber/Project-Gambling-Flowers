@@ -4,7 +4,7 @@ from importlib.util import*
 
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-from inventaire import*
+from Inventaire import*
 import PIL
 import time
 import random as rd
@@ -71,6 +71,33 @@ def stand_de_vente():
     base = ursina.Entity(model="cube", color = color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="cobblestone", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
 
 stand_de_vente()
+
+
+# Peupler l'inventaire avec quelques fleurs au démarrage
+try:
+    for _ in range(5):
+        Item.new_item(rd.choice(mins))
+except Exception as e:
+    print('Erreur lors de la création d\'items d\'inventaire :', e)
+
+# Aussi remplir quelques cases du panneau d'inventaire (non-hotbar)
+try:
+    inv_slots = [h for h in hotspots if not h.onHotbar]
+    for i in range(min(5, len(inv_slots))):
+        h = inv_slots[i]
+        b = Item(rd.choice(mins))
+        b.currentSpot = h
+        items.append(b)
+        h.item = b
+        h.occupied = True
+        h.stack = 1
+        b.onHotbar = False
+        b.visible = False
+        b.x = h.x
+        b.y = h.y
+        b.update_stack_text()
+except Exception as e:
+    print('Erreur lors du remplissage du panneau d\'inventaire :', e)
 
 
 def input(key):

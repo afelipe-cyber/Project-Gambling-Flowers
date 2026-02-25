@@ -1,17 +1,7 @@
-from ursina import (
-    Entity,
-    Draggable,
-    Text,
-    Vec2,
-    Vec3,
-    Vec4,
-    color,
-    camera,
-    Empty,
-    load_model,
-)
+from ursina import *
 import random as ra
 import numpy as np
+import os
 
 """
 Système d'inventaire intégré (sans dépendance au dossier python_meshCraft_tut_2021).
@@ -23,23 +13,35 @@ Système d'inventaire intégré (sans dépendance au dossier python_meshCraft_tu
 """
 
 
-# ---------------------------------------------------------------------------
-# Config (extraits nécessaires de python_meshCraft_tut_2021.config)
-# ---------------------------------------------------------------------------
 
-minerals = {
-    "grass": (8, 7),
-    "soil": (10, 7),
-    "stone": (8, 5),
-    "concrete": (9, 6),
-    "ice": (9, 7),
-    "snow": (8, 6),
-    "ruby": (9, 6, Vec4(1, 0, 0, 1)),
-    "emerald": (9, 6, Vec4(0, 0.8, 0.1, 0.8)),
-    "wood": (11, 7),
-    "foliage": (11, 6),
-}
-mins = list(minerals.keys())
+
+# Construire le catalogue à partir des images dans data/Fleurs et data/Graines
+objets = {}
+# Correction : on cherche le dossier "data" dans le même répertoire que le script
+base_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "data"))
+fleurs_dir = os.path.join(base_dir, "Fleurs")
+graines_dir = os.path.join(base_dir, "Graines")
+
+def _add_images_from_dir(dpath):
+    if not os.path.isdir(dpath):
+        return
+    for fn in sorted(os.listdir(dpath)):
+        if not fn.lower().endswith(('.png', '.jpg', '.jpeg')):
+            continue
+        name = os.path.splitext(fn)[0]
+        # Clef simple dérivée du nom de fichier (sans extension)
+        key = name
+        path = os.path.join(dpath, fn)
+        path = os.path.abspath(path)
+        # On stocke le chemin de l'image comme premier élément du tuple.
+        # Format: (texture_path,) ou (texture_path, Vec4(r,g,b,a)).
+        objets[key] = (path,)
+
+_add_images_from_dir(fleurs_dir)
+_add_images_from_dir(graines_dir)
+
+mins = list(objets.keys())
+print(f"[inventaire] loaded {len(mins)} items")
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +89,7 @@ class Hotspot(Entity):
         this.scale_y = Hotspot.scalar
         this.scale_x = this.scale_y
         this.color = color.white
-        this.texture = "white_box"
+        this.texture = None
         this.z = -1
 
         this.onHotbar = False
@@ -121,6 +123,7 @@ class Hotspot(Entity):
 class Item(Draggable):
     def __init__(this, _blockType):
         super().__init__()
+        this.parent = camera.ui
         # Modèle de base.
         this.model = load_model("quad", use_deepcopy=True)
         this.scale_x = Hotspot.scalar * 0.9
@@ -144,20 +147,42 @@ class Item(Draggable):
         this.set_colour()
 
     def set_texture(this):
-        uu = minerals[this.blockType][0]
-        uv = minerals[this.blockType][1]
-        basemod = load_model("block.obj", use_deepcopy=True)
-        e = Empty(model=basemod)
-        cb = e.model.uvs.copy()
-        cb = cb[-6:]
-        cb = cb[3:] + cb[:3]
-        this.model.uvs = [Vec2(uu, uv) + u for u in cb]
-        this.model.generate()
-        this.rotation_z = 180
+        val = objets[this.blockType][0]
+        # Si la valeur est une chaîne, on la considère comme un chemin d'image
+        if isinstance(val, str):
+            try:
+                tex = load_texture(val)
+                this.texture = tex
+                try:
+                    this.texture_scale *= 64 / tex.width
+                except Exception:
+                    pass
+                this.rotation_z = 180
+            except Exception:
+                print(f"[inventaire] erreur load_texture pour '{this.blockType}' path='{val}'")
+                # fallback: essayer d'assigner la chaîne (ursina peut aussi gérer ça)
+                this.texture = val
+                try:
+                    self_tex = this.texture
+                    this.texture_scale *= 64 / getattr(self_tex, 'width', 64)
+                except Exception:
+                    pass
+                this.rotation_z = 180
+        else:
+            uu = val
+            uv = objets[this.blockType][1]
+            basemod = load_model("block.obj", use_deepcopy=True)
+            e = Empty(model=basemod)
+            cb = e.model.uvs.copy()
+            cb = cb[-6:]
+            cb = cb[3:] + cb[:3]
+            this.model.uvs = [Vec2(uu, uv) + u for u in cb]
+            this.model.generate()
+            this.rotation_z = 180
 
     def set_colour(this):
-        if len(minerals[this.blockType]) > 2:
-            this.color = minerals[this.blockType][2]
+        if len(objets[this.blockType]) > 2:
+            this.color = objets[this.blockType][2]
 
     def fixPos(this):
         closest = -1
@@ -271,14 +296,17 @@ def _base_inv_input(key, subject, mouse):
     except Exception:
         pass
     # Pause / reprise et affichage de l'inventaire.
+    # Pause / reprise et affichage de l'inventaire.
     if key == "e" and subject.enabled:
         Hotspot.toggle()
         subject.disable()
         mouse.locked = False
+        subject.cursor.visible = False  # Cache le carré blanc
     elif key == "e" and not subject.enabled:
         Hotspot.toggle()
         subject.enable()
         mouse.locked = True
+        subject.cursor.visible = True   # Réaffiche le carré blanc
 
 
 def inv_input(key, subject, mouse):
@@ -294,5 +322,3 @@ def inv_input(key, subject, mouse):
         key = azerty_map[key]
     
     _base_inv_input(key, subject, mouse)
-
-
