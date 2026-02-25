@@ -99,7 +99,11 @@ class InventoryItem(Draggable):
 
 
 class Inventory(Entity):
-    """Gère l'affichage et la logique de l'inventaire"""
+    """Gère l'affichage et la logique de l'inventaire.
+
+    Un mini-hotbar (la première rangée) est toujours visible. Appuyer sur
+    "e" bascule l'affichage entre la hotbar seule et l'inventaire complet.
+    """
     
     INVENTORY_WIDTH = 5
     INVENTORY_HEIGHT = 8
@@ -120,6 +124,16 @@ class Inventory(Entity):
             parent=self, 
             scale=(1/self.INVENTORY_WIDTH, 1/self.INVENTORY_HEIGHT)
         )
+
+        # état d'affichage : False = hotbar seule, True = inventaire complet
+        self.showing_full = False
+        # enregistrer la position et l'échelle de l'inventaire complet
+        self._full_pos = self.position
+        self._full_scale = self.scale
+        # calculer une position pour la hotbar (bas de l'écran)
+        self._hotbar_pos = Vec3(0, -0.45 + (self.scale_y * 0.5), 0)
+        # ajuster l'affichage initial (mode hotbar)
+        self._update_display()
     
     def find_free_spot(self):
         """Trouve la première case libre dans l'inventaire"""
