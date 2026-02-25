@@ -37,7 +37,7 @@ for i in range(2):  # 2 zones en largeur
         )
         zone.on_click = lambda z=zone: on_zone_click(z)
 
-player = fpc.FirstPersonController(y=100, scale=2, speed=20)
+player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
 
 def fence():
     for i in range(30):
