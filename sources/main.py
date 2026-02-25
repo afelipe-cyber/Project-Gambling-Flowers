@@ -4,7 +4,7 @@ from importlib.util import*
 
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-from inventaire import*
+from Inventaire import*
 import PIL
 import time
 import random as rd
