@@ -124,6 +124,8 @@ class Inventory(Entity):
             parent=self, 
             scale=(1/self.INVENTORY_WIDTH, 1/self.INVENTORY_HEIGHT)
         )
+        
+        self.visibility = False  # Commence invisible, sera rendu visible après appuie sur e
 
         # état d'affichage : False = hotbar seule, True = inventaire complet
         self.showing_full = False
