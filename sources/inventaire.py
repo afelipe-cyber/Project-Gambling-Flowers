@@ -15,33 +15,33 @@ Système d'inventaire intégré (sans dépendance au dossier python_meshCraft_tu
 
 
 
-# Construire le catalogue à partir des images dans data/Fleurs et data/Graines
-objets = {}
-# Correction : on cherche le dossier "data" dans le même répertoire que le script
-base_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "data"))
-fleurs_dir = os.path.join(base_dir, "Fleurs")
-graines_dir = os.path.join(base_dir, "Graines")
+# # Construire le catalogue à partir des images dans data/Fleurs et data/Graines
+# objets = {}
+# # Correction : on cherche le dossier "data" dans le même répertoire que le script
+# base_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "data"))
+# fleurs_dir = os.path.join(base_dir, "Fleurs")
+# graines_dir = os.path.join(base_dir, "Graines")
 
-def _add_images_from_dir(dpath):
-    if not os.path.isdir(dpath):
-        return
-    for fn in sorted(os.listdir(dpath)):
-        if not fn.lower().endswith(('.png', '.jpg', '.jpeg')):
-            continue
-        name = os.path.splitext(fn)[0]
-        # Clef simple dérivée du nom de fichier (sans extension)
-        key = name
-        path = os.path.join(dpath, fn)
-        path = os.path.abspath(path)
-        # On stocke le chemin de l'image comme premier élément du tuple.
-        # Format: (texture_path,) ou (texture_path, Vec4(r,g,b,a)).
-        objets[key] = (path,)
+# def _add_images_from_dir(dpath):
+#     if not os.path.isdir(dpath):
+#         return
+#     for fn in sorted(os.listdir(dpath)):
+#         if not fn.lower().endswith(('.png', '.jpg', '.jpeg')):
+#             continue
+#         name = os.path.splitext(fn)[0]
+#         # Clef simple dérivée du nom de fichier (sans extension)
+#         key = name
+#         path = os.path.join(dpath, fn)
+#         path = os.path.abspath(path)
+#         # On stocke le chemin de l'image comme premier élément du tuple.
+#         # Format: (texture_path,) ou (texture_path, Vec4(r,g,b,a)).
+#         objets[key] = (path,)
 
-_add_images_from_dir(fleurs_dir)
-_add_images_from_dir(graines_dir)
+# _add_images_from_dir(fleurs_dir)
+# _add_images_from_dir(graines_dir)
 
-mins = list(objets.keys())
-print(f"[inventaire] loaded {len(mins)} items")
+# mins = list(objets.keys())
+# print(f"[inventaire] loaded {len(mins)} items")
 
 
 # ---------------------------------------------------------------------------
@@ -133,11 +133,11 @@ class Item(Draggable):
         this.texture_scale *= 64 / this.texture.width
         this.z = -2
 
-        # Type de bloc.
-        if _blockType is None:
-            this.blockType = mins[ra.randint(0, len(mins) - 1)]
-        else:
-            this.blockType = _blockType
+        # # Type de bloc.
+        # if _blockType is None:
+        #     this.blockType = mins[ra.randint(0, len(mins) - 1)]
+        # else:
+        #     this.blockType = _blockType
 
         this.onHotbar = False
         this.visible = False
@@ -146,43 +146,43 @@ class Item(Draggable):
         this.set_texture()
         this.set_colour()
 
-    def set_texture(this):
-        val = objets[this.blockType][0]
-        # Si la valeur est une chaîne, on la considère comme un chemin d'image
-        if isinstance(val, str):
-            try:
-                tex = load_texture(val)
-                this.texture = tex
-                try:
-                    this.texture_scale *= 64 / tex.width
-                except Exception:
-                    pass
-                this.rotation_z = 180
-            except Exception:
-                print(f"[inventaire] erreur load_texture pour '{this.blockType}' path='{val}'")
-                # fallback: essayer d'assigner la chaîne (ursina peut aussi gérer ça)
-                this.texture = val
-                try:
-                    self_tex = this.texture
-                    this.texture_scale *= 64 / getattr(self_tex, 'width', 64)
-                except Exception:
-                    pass
-                this.rotation_z = 180
-        else:
-            uu = val
-            uv = objets[this.blockType][1]
-            basemod = load_model("block.obj", use_deepcopy=True)
-            e = Empty(model=basemod)
-            cb = e.model.uvs.copy()
-            cb = cb[-6:]
-            cb = cb[3:] + cb[:3]
-            this.model.uvs = [Vec2(uu, uv) + u for u in cb]
-            this.model.generate()
-            this.rotation_z = 180
+    # def set_texture(this):
+    #     val = objets[this.blockType][0]
+    #     # Si la valeur est une chaîne, on la considère comme un chemin d'image
+    #     if isinstance(val, str):
+    #         try:
+    #             tex = load_texture(val)
+    #             this.texture = tex
+    #             try:
+    #                 this.texture_scale *= 64 / tex.width
+    #             except Exception:
+    #                 pass
+    #             this.rotation_z = 180
+    #         except Exception:
+    #             print(f"[inventaire] erreur load_texture pour '{this.blockType}' path='{val}'")
+    #             # fallback: essayer d'assigner la chaîne (ursina peut aussi gérer ça)
+    #             this.texture = val
+    #             try:
+    #                 self_tex = this.texture
+    #                 this.texture_scale *= 64 / getattr(self_tex, 'width', 64)
+    #             except Exception:
+    #                 pass
+    #             this.rotation_z = 180
+    #     else:
+    #         uu = val
+    #         uv = objets[this.blockType][1]
+    #         basemod = load_model("block.obj", use_deepcopy=True)
+    #         e = Empty(model=basemod)
+    #         cb = e.model.uvs.copy()
+    #         cb = cb[-6:]
+    #         cb = cb[3:] + cb[:3]
+    #         this.model.uvs = [Vec2(uu, uv) + u for u in cb]
+    #         this.model.generate()
+    #         this.rotation_z = 180
 
-    def set_colour(this):
-        if len(objets[this.blockType]) > 2:
-            this.color = objets[this.blockType][2]
+    # def set_colour(this):
+    #     if len(objets[this.blockType]) > 2:
+    #         this.color = objets[this.blockType][2]
 
     def fixPos(this):
         closest = -1
@@ -279,8 +279,6 @@ for i in range(Hotspot.rowFit):
 Hotspot.toggle()
 Hotspot.toggle()
 
-# Texte "où suis-je ?".
-
 
 def _base_inv_input(key, subject, mouse):
     """Logique d'inventaire du tutoriel (sans wrapper AZERTY)."""
@@ -295,7 +293,6 @@ def _base_inv_input(key, subject, mouse):
                 subject.blockType = hotspots[wnum].item.blockType
     except Exception:
         pass
-    # Pause / reprise et affichage de l'inventaire.
     # Pause / reprise et affichage de l'inventaire.
     if key == "e" and subject.enabled:
         Hotspot.toggle()
