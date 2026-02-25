@@ -1,0 +1,185 @@
+from ursina import *
+
+class InventoryItem(Draggable):
+    """Classe pour gérer un item unique de l'inventaire"""
+    
+    def __init__(self, parent, item_name, **kwargs):
+        self.item_name = item_name
+        self.original_position = None
+        self.stack = 1  # Nombre d'items dans cette pile
+        
+        super().__init__(
+            parent = parent,
+            model = 'quad',
+            texture = item_name,
+            color = color.white,
+            origin = (-.5, .5),
+            z = -.5,
+            **kwargs
+        )
+        
+        self._setup_tooltip()
+        self.drag = self._on_drag
+        self.drop = self._on_drop
+    
+    def _setup_tooltip(self):
+        """Configure le tooltip avec le nom de l'item et le stack"""
+        self._update_tooltip_text()
+        self.tooltip.background.color = color.hsv(0, 0, 0, .8)
+    
+    def _update_tooltip_text(self):
+        """Met à jour le texte du tooltip avec le nom et le stack"""
+        name = self.item_name.replace('_', ' ').title()
+        if self.stack > 1:
+            name += f"-{self.stack}"
+        self.tooltip = Tooltip(name)
+        self.tooltip.background.color = color.hsv(0, 0, 0, .8)
+    
+    
+    def _on_drag(self):
+        """Appelé quand l'item commence à être dragué"""
+        self.original_position = (self.x, self.y)
+        self.z -= .05  # Assure que l'item dragué est au-dessus
+    
+    def _on_drop(self, inventory):
+        """Appelé quand l'item est relâché"""
+        self._snap_to_grid()
+        self.z += .05
+        
+        if not self._is_inside_inventory(inventory):
+            self._restore_position()
+            return
+        
+        self._swap_if_occupied(inventory)
+    
+    def _snap_to_grid(self):
+        """Arrondit la position pour coller à la grille"""
+        self.x = int(self.x)
+        self.y = int(self.y)
+        self.z = -0.5
+    
+    def _is_inside_inventory(self, inventory):
+        """Vérifie si l'item est dans les limites de l'inventaire"""
+        return not (self.x < 0 or self.x >= inventory.INVENTORY_WIDTH or self.y > 0 or self.y <= -inventory.INVENTORY_HEIGHT)
+    
+    def _restore_position(self):
+        """Restaure la position originale"""
+        self.position = self.original_position
+    
+    def _swap_if_occupied(self, inventory):
+        """Gère les collisions: fusionne si même type, échange sinon"""
+        # Sauvegarder la position avant de potentiellement détruire self
+        my_x, my_y = self.x, self.y
+        my_original_pos = self.original_position
+        
+        for other_item in inventory.item_parent.children:
+            if other_item != self and other_item.x == my_x and other_item.y == my_y:
+                # Vérifier si c'est le même type d'item
+                if other_item.item_name == self.item_name:
+                    # Même type: augmenter le compteur de 1 et détruire cet item
+                    other_item.stack += self.stack
+                    # mettre à jour l'affichage (tooltip/label) du stack
+                    if hasattr(other_item, '_update_tooltip_text'):
+                        try:
+                            other_item._update_tooltip_text()
+                        except Exception:
+                            pass
+                    destroy(self)
+                else:
+                    # Type différent: échanger les positions
+                    other_item.position = my_original_pos
+                    self.position = (my_x, my_y)
+                return
+    
+
+
+class Inventory(Entity):
+    """Gère l'affichage et la logique de l'inventaire"""
+    
+    INVENTORY_WIDTH = 5
+    INVENTORY_HEIGHT = 8
+    
+    def __init__(self):
+        super().__init__(
+            parent = camera.ui,
+            model = 'quad',
+            scale = (.5, .8),
+            origin = (-.5, .5),
+            position = (-.3, .4),
+            texture = 'white_cube',
+            texture_scale = (self.INVENTORY_WIDTH, self.INVENTORY_HEIGHT),
+            color = color.dark_gray
+        )
+        
+        self.item_parent = Entity(
+            parent=self, 
+            scale=(1/self.INVENTORY_WIDTH, 1/self.INVENTORY_HEIGHT)
+        )
+    
+    def find_free_spot(self):
+        """Trouve la première case libre dans l'inventaire"""
+        taken_spots = [(int(item.x), int(item.y)) 
+                       for item in self.item_parent.children]
+        
+        for y in range(self.INVENTORY_HEIGHT):
+            for x in range(self.INVENTORY_WIDTH):
+                if (x, -y) not in taken_spots:
+                    return (x, -y)
+        
+        return None
+    
+    def add_item(self, item_name):
+        """Ajoute un item à l'inventaire"""
+        free_spot = self.find_free_spot()
+        
+        if free_spot is None:
+            print("L'inventaire est plein!")
+            return
+        
+        item = InventoryItem(
+            parent = self.item_parent,
+            item_name = item_name,
+            position = free_spot
+        )
+        
+        # Créer une référence à self pour que le drop puisse y accéder
+        item._inventory = self
+        
+        # Wrapper le drop pour passer l'inventaire
+        original_drop = item._on_drop
+        item.drop = lambda: original_drop(self)
+
+    
+
+
+def main():
+    app = Ursina()
+    inventory = Inventory()
+    
+    # Liste des items disponibles
+    available_items = ('bag', 'bow_arrow', 'gem', 'orb', 'sword')
+    
+    def add_random_item():
+        """Ajoute un item aléatoire à l'inventaire"""
+        item_name = random.choice(available_items)
+        inventory.add_item(item_name)
+    
+    # Ajouter 7 items au démarrage
+    for _ in range(7):
+        add_random_item()
+    
+    # Bouton pour ajouter des items
+    add_item_button = Button(
+        scale = (.1, .1),
+        x = -.5,
+        color = color.lime.tint(-.25),
+        text = '+',
+        tooltip = Tooltip('Add random item'),
+        on_click = add_random_item
+    )
+    
+    app.run()
+
+
+if __name__ == '__main__':
+    main()
