@@ -102,16 +102,15 @@ graines = {
     "Muget bleu": Graines("Graines de Muget bleu", 0),
     "Padisachidée": Graines("Graines de Padisachidée", 0),
     "Rose arc-en-ciel": Graines("Graines de Rose arc-en-ciel", 0),
-    "Rose sumérienne": Graines("Graine de Rose sumérienne", 0),
+    "Rose sumérienne": Graines("Graines de Rose sumérienne", 0),
     "Viparyas": Graines("Graines de Viparyas", 0),
 
 }
 
 # Test
-print("Fleurs disponibles :")
-for nom, fleur in fleurs.items():
-    print(fleur.affichage_fl())
-
-print("\nGraines disponibles :")
-for nom, graine in Graines.items():
-    print(graine.affichage_gr())
+if __name__ == "__main__":
+    for nom, fleur in fleurs.items():
+        print(fleur.affichage_fl())
+    
+    for nom, graine in graines.items():
+        print(graine.affichage_gr())
