@@ -39,6 +39,39 @@ for i in range(2):  # 2 zones en largeur
 
 player = fpc.FirstPersonController(y=100, scale=2, speed=20)
 
+def fence():
+    for i in range(30):
+        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, 49), scale=(0.7, 4.5, 0.7), collider="mesh")
+    
+    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, 49), scale=(100, 0.43, 0.35), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, 49), scale=(100, 0.43, 0.35), collider="mesh")
+
+    for i in range(29):
+        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
+    
+    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
+
+    for i in range(30):
+        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, -48.875), scale=(0.7, 4.5, 0.7), collider="mesh")
+
+    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
+
+    for i in range(29):
+        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-48.875, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
+
+    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, -49), scale=(100, 0.43, 0.35), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, -49), scale=(100, 0.43, 0.35), collider="mesh")
+
+fence()
+
+
+def stand_de_vente():
+    base = ursina.Entity(model="cube", color = color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="cobblestone", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
+
+stand_de_vente()
+
 
 def input(key):
     try:
