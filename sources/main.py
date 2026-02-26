@@ -101,11 +101,11 @@ stand_de_vente()
 #     print('Erreur lors du remplissage du panneau d\'inventaire :', e)
 
 
-# def input(key):
-#     try:
-#         inv_input(key, player, fpc.mouse)
-#     except Exception as e:
-#         print("inv_input error:", e)
+def input(key):
+    try:
+        inv_input(key, player, fpc.mouse)
+    except Exception as e:
+        print("inv_input error:", e)
 
 
 

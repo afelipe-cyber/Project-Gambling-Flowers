@@ -2,6 +2,30 @@ from ursina import *
 from Objets import *
 
 
+hotspots = []
+items = []
+
+hotbar = Entity(model="quad", parent=camera.ui)
+hot_cols = 9
+hot_wid = 1 / 16  # Largeur d'un slot ~ 1/10 de la hauteur de fenêtre.
+hb_wid = hot_wid * hot_cols
+hotbar.scale = Vec3(hb_wid, hot_wid, 0)
+hotbar.y = -0.45 + (hotbar.scale_y * 0.5)
+hotbar.color = color.dark_gray
+hotbar.z = 0
+
+iPan = Entity(model="quad", parent=camera.ui)
+iPan.rows = 3
+iPan.scale_y = hotbar.scale_y * iPan.rows
+iPan.scale_x = hotbar.scale_x
+iPan.basePosY = hotbar.y + (hotbar.scale_y * 0.5) + (iPan.scale_y * 0.5)
+iPan.gap = hotbar.scale_y
+iPan.y = iPan.basePosY + iPan.gap
+iPan.color = color.light_gray
+iPan.z = 0
+iPan.visible = False
+
+
 class InventoryItem(Draggable):
     """Classe pour gérer un item unique de l'inventaire"""
     
@@ -104,28 +128,32 @@ class Inventory(Entity):
     Un mini-hotbar (la première rangée) est toujours visible. Appuyer sur
     "e" bascule l'affichage entre la hotbar seule et l'inventaire complet.
     """
-    
-    INVENTORY_WIDTH = 5
-    INVENTORY_HEIGHT = 8
-    
+    scalar = hotbar.scale_y * 0.9
+    rowFit = 9
+    # dimensions de l'inventaire (largeur = nombre de colonnes, hauteur = lignes)
+    INVENTORY_WIDTH = hot_cols
+    INVENTORY_HEIGHT = iPan.rows
+
     def __init__(self):
+        # utiliser une variable intermédiaire pour éviter de lire self.scale_y
+        s = Inventory.scalar
         super().__init__(
             parent = camera.ui,
             model = 'quad',
-            scale = (.5, .8),
+            scale_y = s,
+            scale_x = s,
             origin = (-.5, .5),
             position = (-.3, .4),
             texture = 'white_cube',
-            texture_scale = (self.INVENTORY_WIDTH, self.INVENTORY_HEIGHT),
-            color = color.dark_gray
+            color = color.dark_gray,
+            z = -1,
+            visibility = False # Commence invisible, sera rendu visible après appuie sur e
         )
         
         self.item_parent = Entity(
             parent=self, 
             scale=(1/self.INVENTORY_WIDTH, 1/self.INVENTORY_HEIGHT)
-        )
-        
-        self.visibility = False  # Commence invisible, sera rendu visible après appuie sur e
+        ) 
 
         # état d'affichage : False = hotbar seule, True = inventaire complet
         self.showing_full = False
@@ -134,8 +162,20 @@ class Inventory(Entity):
         self._full_scale = self.scale
         # calculer une position pour la hotbar (bas de l'écran)
         self._hotbar_pos = Vec3(0, -0.45 + (self.scale_y * 0.5), 0)
-        # ajuster l'affichage initial (mode hotbar)
-        self._update_display()
+
+    @staticmethod
+    def toggle():
+        # Affiche / cache le panneau principal.
+        iPan.visible = not iPan.visible
+        # Bascule la visibilité des slots non-hotbar.
+        for h in hotspots:
+            if not h.onHotbar:
+                h.visible = not h.visible
+                if hasattr(h, 't'):
+                    h.t.visible = h.visible
+                if hasattr(h, 'item'):
+                    h.item.visible = h.visible
+
     
     def find_free_spot(self):
         """Trouve la première case libre dans l'inventaire"""
@@ -178,26 +218,86 @@ def main():
     inventory = Inventory()
     
     # Liste des items disponibles
-    available_items = list(fleurs.keys())
     
+    
+
+    for i in range(Inventory.rowFit):
+        bud = Inventory()
+        bud.onHotbar = True
+        bud.visible = True
+        bud.y = hotbar.y
+        bud.x = hotbar.x - hotbar.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2 + i * bud.scale_x * 1.1
+        hotspots.append(bud)
+
+    for i in range(Inventory.rowFit):
+        for j in range(iPan.rows):
+            bud = Inventory()
+            bud.onHotbar = False
+            bud.visible = False
+            bud.y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2 - Inventory.scalar * j * 1.1
+            bud.x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2 + i * Inventory.scalar * 1.1
+            hotspots.append(bud)
+    Inventory.toggle()
+    Inventory.toggle()
+
+# ==========================
+# input helper functions
+# ==========================
+
+def _base_inv_input(key, subject, mouse):
+    try:
+        wnum = int(key)
+        if 0 < wnum < 10:
+            for h in hotspots:
+                h.color = color.white
+            wnum -= 1
+            hotspots[wnum].color = color.black
+            if hotspots[wnum].occupied:
+                subject.blockType = hotspots[wnum].item.blockType
+    except Exception:
+        pass
+    # Pause / reprise et affichage de l'inventaire.
+    if key == "e" and subject.enabled:
+        Inventory.toggle()
+        subject.disable()
+        mouse.locked = False
+        subject.cursor.visible = False  # Cache le carré blanc
+    elif key == "e" and not subject.enabled:
+        Inventory.toggle()
+        subject.enable()
+        mouse.locked = True
+        subject.cursor.visible = True   # Réaffiche le carré blanc
+
+
+def inv_input(key, subject, mouse):
+    """Wrapper AZERTY + call base handler"""
+    azerty_map = {
+        '&': '1', 'é': '2', '"': '3', "'": '4', '(': '5',
+        '-': '6', 'è': '7', '_': '8', 'ç': '9'
+    }
+    if key in azerty_map:
+        key = azerty_map[key]
+    _base_inv_input(key, subject, mouse)
+
     def add_random_item():
+        available_items = list(fleurs.keys())
         """Ajoute un item aléatoire à l'inventaire"""
         item_name = random.choice(available_items)
-        inventory.add_item(item_name)
+        Inventory.add_item(item_name)
     
     # Ajouter 7 items au démarrage
     for _ in range(7):
         add_random_item()
     
-    # Bouton pour ajouter des items
-    add_item_button = Button(
-        scale = (.1, .1),
-        x = -.5,
-        color = color.lime.tint(-.25),
-        text = '+',
-        tooltip = Tooltip('Add random item'),
-        on_click = add_random_item
-    )
+    # # Bouton pour ajouter des items
+    # add_item_button = Button(
+    #     scale = (.1, .1),
+    #     x = -.5,
+    #     color = color.lime.tint(-.25),
+    #     text = '+',
+    #     tooltip = Tooltip('Add random item'),
+    #     on_click = add_random_item
+    # )
     
     app.run()
 
