@@ -1,5 +1,7 @@
 from ursina import *
 from Objets import *
+import ursina.prefabs.first_person_controller as fpc
+import random
 
 
 hotspots = []
@@ -11,7 +13,7 @@ hot_wid = 1 / 16  # Largeur d'un slot ~ 1/10 de la hauteur de fenêtre.
 hb_wid = hot_wid * hot_cols
 hotbar.scale = Vec3(hb_wid, hot_wid, 0)
 hotbar.y = -0.45 + (hotbar.scale_y * 0.5)
-hotbar.color = color.dark_gray
+hotbar.color = color.white
 hotbar.z = 0
 
 iPan = Entity(model="quad", parent=camera.ui)
@@ -35,7 +37,10 @@ class InventoryItem(Draggable):
         self.stack = 1  # Nombre d'items dans cette pile
         
         # Obtenir le chemin de texture depuis le dictionnaire
-        texture_path = texture_paths.get(item_name, item_name)
+        texture_path = texture_paths.get(item_name, None)
+        if texture_path is None:
+            print(f"Warning: texture_path not found for {item_name}, using item_name as fallback")
+            texture_path = item_name
         
         super().__init__(
             parent = parent,
@@ -213,13 +218,15 @@ class Inventory(Entity):
     
 
 
-def main():
-    app = Ursina()
+def init_inventory():
+    """Initialise l'inventaire et crée les slots"""
     inventory = Inventory()
     
-    # Liste des items disponibles
-    
-    
+    # Debug: Vérifier que texture_paths est rempli
+    print(f"DEBUG: texture_paths contient {len(texture_paths)} entrées")
+    if texture_paths:
+        first_key = list(texture_paths.keys())[0]
+        print(f"DEBUG: Exemple - {first_key}: {texture_paths[first_key]}")
 
     for i in range(Inventory.rowFit):
         bud = Inventory()
@@ -240,11 +247,25 @@ def main():
     Inventory.toggle()
     Inventory.toggle()
 
+    # Ajouter 7 items au démarrage
+    available_items = list(fleurs.keys())
+    for _ in range(7):
+        item_name = random.choice(available_items)
+        inventory.add_item(item_name)
+    
+    return inventory
+
+
 # ==========================
 # input helper functions
 # ==========================
 
+# Variables globales pour l'inventaire
+player = None
+
 def _base_inv_input(key, subject, mouse):
+    if subject is None:
+        return
     try:
         wnum = int(key)
         if 0 < wnum < 10:
@@ -257,16 +278,24 @@ def _base_inv_input(key, subject, mouse):
     except Exception:
         pass
     # Pause / reprise et affichage de l'inventaire.
-    if key == "e" and subject.enabled:
-        Inventory.toggle()
-        subject.disable()
-        mouse.locked = False
-        subject.cursor.visible = False  # Cache le carré blanc
-    elif key == "e" and not subject.enabled:
-        Inventory.toggle()
-        subject.enable()
-        mouse.locked = True
-        subject.cursor.visible = True   # Réaffiche le carré blanc
+    if key == "e":
+        if hasattr(subject, 'enabled') and subject.enabled:
+            Inventory.toggle()
+            subject.disable()
+            if hasattr(mouse, 'locked'):
+                mouse.locked = False
+            if hasattr(subject, 'cursor'):
+                subject.cursor.visible = False
+        elif hasattr(subject, 'enabled'):
+            Inventory.toggle()
+            subject.enable()
+            if hasattr(mouse, 'locked'):
+                mouse.locked = True
+            if hasattr(subject, 'cursor'):
+                subject.cursor.visible = True
+        else:
+            # Si subject n'a pas d'attribut 'enabled', juste toggle
+            Inventory.toggle()
 
 
 def inv_input(key, subject, mouse):
@@ -279,28 +308,4 @@ def inv_input(key, subject, mouse):
         key = azerty_map[key]
     _base_inv_input(key, subject, mouse)
 
-    def add_random_item():
-        available_items = list(fleurs.keys())
-        """Ajoute un item aléatoire à l'inventaire"""
-        item_name = random.choice(available_items)
-        Inventory.add_item(item_name)
     
-    # Ajouter 7 items au démarrage
-    for _ in range(7):
-        add_random_item()
-    
-    # # Bouton pour ajouter des items
-    # add_item_button = Button(
-    #     scale = (.1, .1),
-    #     x = -.5,
-    #     color = color.lime.tint(-.25),
-    #     text = '+',
-    #     tooltip = Tooltip('Add random item'),
-    #     on_click = add_random_item
-    # )
-    
-    app.run()
-
-
-if __name__ == '__main__':
-    main()

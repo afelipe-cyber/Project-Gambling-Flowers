@@ -14,6 +14,9 @@ import pygame as pg
 
 app = ursina.Ursina()
 
+# Initialiser l'inventaire
+inventory = init_inventory()
+
 # Créer le terrain
 platform = ursina.Entity(model='plane', texture='grass', scale=(100, 1, 100), collider='mesh')
 
@@ -39,6 +42,10 @@ for i in range(2):  # 2 zones en largeur
         zone.on_click = lambda z=zone: on_zone_click(z)
 
 player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
+
+# Mettre à jour la référence globale du joueur pour l'inventaire
+import InventaireBIS
+InventaireBIS.player = player
 
 def fence():
     for i in range(30):
