@@ -13,7 +13,7 @@ hot_wid = 1 / 16  # Largeur d'un slot ~ 1/10 de la hauteur de fenêtre.
 hb_wid = hot_wid * hot_cols
 hotbar.scale = Vec3(hb_wid, hot_wid, 0)
 hotbar.y = -0.45 + (hotbar.scale_y * 0.5)
-hotbar.color = color.white
+hotbar.color = color.light_gray
 hotbar.z = 0
 
 iPan = Entity(model="quad", parent=camera.ui)
@@ -147,18 +147,21 @@ class Inventory(Entity):
             model = 'quad',
             scale_y = s,
             scale_x = s,
-            origin = (-.5, .5),
-            position = (-.3, .4),
-            texture = 'white_cube',
+            texture = None,
             color = color.dark_gray,
             z = -1,
             visibility = False # Commence invisible, sera rendu visible après appuie sur e
         )
         
+        # Conteneur pour les items; il ne doit pas être redimensionné
+        # car les positions des items sont déjà exprimées en unités de
+        # grille correspondant aux carrés gris foncé (hotspots). Une échelle
+        # différente provoquait un décalage visuel.
         self.item_parent = Entity(
-            parent=self, 
-            scale=(1/self.INVENTORY_WIDTH, 1/self.INVENTORY_HEIGHT)
-        ) 
+            parent=self,
+            position=(-self.scale_x, -self.scale_y, 0),
+            scale=Vec3(1, 1, 1),
+        )
 
         # état d'affichage : False = hotbar seule, True = inventaire complet
         self.showing_full = False
