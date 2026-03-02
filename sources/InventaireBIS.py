@@ -316,6 +316,32 @@ class Inventory(Entity):
     
 
 
+class hotbarItem(Draggable):
+    def __init__(this, parent, item_name, **kwargs):
+        this.item_name = item_name
+        super().__init__(
+            parent = parent,
+            model = 'quad',
+            texture = texture_paths[item_name],
+            color = color.white,
+            origin = (0, 0),
+            z = -.5
+        )
+
+    def _on_drag(self):
+        self.original_position = (self.x, self.y)
+        self.z -= .05
+
+    def _on_drop(self, inventory):
+        self._snap_to_grid(inventory)
+        self.z += .05
+
+    def _snap_to_grid(self, inventory):
+        self.grid_x, self.grid_y = inventory.world_to_grid(self.x, self.y)
+        self.position = inventory.grid_to_world(self.grid_x, self.grid_y)
+        self.z = -0.5 
+# à continuer...
+
 def init_inventory():
     """Initialise l'inventaire et crée les slots"""
     inventory = Inventory()
