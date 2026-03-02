@@ -200,7 +200,7 @@ class Inventory(Entity):
             scale_y = s,
             scale_x = s,
             texture = None,
-            color = color.light_gray,
+            color = color.dark_gray,
             z = -1,
             visibility = False # Commence invisible, sera rendu visible après appuie sur e
         )
@@ -319,6 +319,10 @@ class Inventory(Entity):
 def init_inventory():
     """Initialise l'inventaire et crée les slots"""
     inventory = Inventory()
+    # Réduit l'entité principale pour qu'elle ne dessine pas de grand carré au centre,
+    # tout en gardant les autres instances (hotbar + grille) à leur taille normale.
+    inventory.scale_x = 0
+    inventory.scale_y = 0
     # Mémorise l'instance principale de l'inventaire (celle qui contient les items)
     Inventory.instance = inventory
     
