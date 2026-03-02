@@ -47,10 +47,18 @@ class InventoryItem(Draggable):
             model = 'quad',
             texture = texture_path,
             color = color.white,
-            origin = (-.5, .5),
+            origin = (0, 0),
             z = -.5,
             **kwargs
         )
+        # Adapter la taille de l'icône à celle d'un slot
+        try:
+            from math import isfinite  # pour éviter les soucis d'import si modifié ailleurs
+            slot_size = Inventory.scalar * 0.9
+            self.scale_x = slot_size
+            self.scale_y = slot_size
+        except Exception:
+            pass
         
         self._setup_tooltip()
         self.drag = self._on_drag
@@ -73,11 +81,14 @@ class InventoryItem(Draggable):
     def _on_drag(self):
         """Appelé quand l'item commence à être dragué"""
         self.original_position = (self.x, self.y)
+        # Sauvegarde aussi la case de grille actuelle si disponible
+        if hasattr(self, "grid_x") and hasattr(self, "grid_y"):
+            self.original_grid = (self.grid_x, self.grid_y)
         self.z -= .05  # Assure que l'item dragué est au-dessus
     
     def _on_drop(self, inventory):
         """Appelé quand l'item est relâché"""
-        self._snap_to_grid()
+        self._snap_to_grid(inventory)
         self.z += .05
         
         if not self._is_inside_inventory(inventory):
@@ -86,28 +97,65 @@ class InventoryItem(Draggable):
         
         self._swap_if_occupied(inventory)
     
-    def _snap_to_grid(self):
-        """Arrondit la position pour coller à la grille"""
-        self.x = int(self.x)
-        self.y = int(self.y)
+    def _snap_to_grid(self, inventory):
+        """Place l'item au centre de la case de grille la plus proche"""
+        # On part de la position écran actuelle
+        wx, wy = self.x, self.y
+        gx, gy = inventory.world_to_grid(wx, wy)
+
+        # Enregistrer la position de grille arrondie
+        self.grid_x = gx
+        self.grid_y = gy
+
+        # Reconvertir en coordonnées écran alignées sur la case
+        snapped_pos = inventory.grid_to_world(gx, gy)
+        self.position = snapped_pos
         self.z = -0.5
     
     def _is_inside_inventory(self, inventory):
         """Vérifie si l'item est dans les limites de l'inventaire"""
-        return not (self.x < 0 or self.x >= inventory.INVENTORY_WIDTH or self.y > 0 or self.y <= -inventory.INVENTORY_HEIGHT)
+        # Utilise les indices de grille plutôt que les coordonnées écran brutes
+        gx = getattr(self, "grid_x", None)
+        gy = getattr(self, "grid_y", None)
+        if gx is None or gy is None:
+            gx, gy = inventory.world_to_grid(self.x, self.y)
+            self.grid_x, self.grid_y = gx, gy
+
+        return not (
+            gx < 0
+            or gx >= inventory.INVENTORY_WIDTH
+            or gy > 0
+            or gy <= -inventory.INVENTORY_HEIGHT
+        )
     
     def _restore_position(self):
         """Restaure la position originale"""
+        # Restaure la position écran
         self.position = self.original_position
+        # Et la case de grille si elle a été sauvegardée
+        if hasattr(self, "original_grid"):
+            self.grid_x, self.grid_y = self.original_grid
     
     def _swap_if_occupied(self, inventory):
         """Gère les collisions: fusionne si même type, échange sinon"""
         # Sauvegarder la position avant de potentiellement détruire self
-        my_x, my_y = self.x, self.y
+        my_x = getattr(self, "grid_x", None)
+        my_y = getattr(self, "grid_y", None)
+        if my_x is None or my_y is None:
+            my_x, my_y = inventory.world_to_grid(self.x, self.y)
+            self.grid_x, self.grid_y = my_x, my_y
         my_original_pos = self.original_position
+        my_original_grid = getattr(self, "original_grid", (my_x, my_y))
         
         for other_item in inventory.item_parent.children:
-            if other_item != self and other_item.x == my_x and other_item.y == my_y:
+            # S'assurer que l'autre item a aussi des coordonnées de grille
+            ox = getattr(other_item, "grid_x", None)
+            oy = getattr(other_item, "grid_y", None)
+            if ox is None or oy is None:
+                ox, oy = inventory.world_to_grid(other_item.x, other_item.y)
+                other_item.grid_x, other_item.grid_y = ox, oy
+
+            if other_item != self and ox == my_x and oy == my_y:
                 # Vérifier si c'est le même type d'item
                 if other_item.item_name == self.item_name:
                     # Même type: augmenter le compteur de 1 et détruire cet item
@@ -120,9 +168,13 @@ class InventoryItem(Draggable):
                             pass
                     destroy(self)
                 else:
-                    # Type différent: échanger les positions
-                    other_item.position = my_original_pos
-                    self.position = (my_x, my_y)
+                    # Type différent: échanger les cases de grille et les positions
+                    ogx, ogy = my_original_grid
+                    other_item.grid_x, other_item.grid_y = ogx, ogy
+                    self.grid_x, self.grid_y = my_x, my_y
+
+                    other_item.position = inventory.grid_to_world(ogx, ogy)
+                    self.position = inventory.grid_to_world(my_x, my_y)
                 return
     
 
@@ -148,18 +200,16 @@ class Inventory(Entity):
             scale_y = s,
             scale_x = s,
             texture = None,
-            color = color.dark_gray,
+            color = color.light_gray,
             z = -1,
             visibility = False # Commence invisible, sera rendu visible après appuie sur e
         )
         
-        # Conteneur pour les items; il ne doit pas être redimensionné
-        # car les positions des items sont déjà exprimées en unités de
-        # grille correspondant aux carrés gris foncé (hotspots). Une échelle
-        # différente provoquait un décalage visuel.
+        # Conteneur pour les items; on le parent à l'UI pour ne pas subir
+        # l'échelle de l'entité Inventory elle-même.
         self.item_parent = Entity(
-            parent=self,
-            position=(-self.scale_x, -self.scale_y, 0),
+            parent=camera.ui,
+            position=(0, 0, -1),
             scale=Vec3(1, 1, 1),
         )
 
@@ -171,24 +221,61 @@ class Inventory(Entity):
         # calculer une position pour la hotbar (bas de l'écran)
         self._hotbar_pos = Vec3(0, -0.45 + (self.scale_y * 0.5), 0)
 
+    def grid_to_world(self, gx, gy):
+        """Convertit une coordonnée de grille (x, y) en position écran alignée sur les slots."""
+        slot_size = Inventory.scalar * 1.1
+
+        # Centre de la première case (colonne 0, rangée 0)
+        base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+        base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2
+
+        x = base_x + gx * slot_size
+        y = base_y + gy * slot_size
+
+        return Vec3(x, y, -0.5)
+
+    def world_to_grid(self, wx, wy):
+        """Convertit une position écran en indices de grille (x, y)."""
+        slot_size = Inventory.scalar * 1.1
+
+        base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+        base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2
+
+        gx = round((wx - base_x) / slot_size)
+        gy = round((wy - base_y) / slot_size)
+
+        return gx, gy
+
     @staticmethod
     def toggle():
         # Affiche / cache le panneau principal.
         iPan.visible = not iPan.visible
+        show = iPan.visible
         # Bascule la visibilité des slots non-hotbar.
         for h in hotspots:
             if not h.onHotbar:
-                h.visible = not h.visible
+                h.visible = show
                 if hasattr(h, 't'):
                     h.t.visible = h.visible
                 if hasattr(h, 'item'):
                     h.item.visible = h.visible
+        # Bascule aussi la visibilité des items de l'inventaire BIS
+        inv = getattr(Inventory, "instance", None)
+        if inv is not None:
+            for child in inv.item_parent.children:
+                child.visible = show
 
     
     def find_free_spot(self):
         """Trouve la première case libre dans l'inventaire"""
-        taken_spots = [(int(item.x), int(item.y)) 
-                       for item in self.item_parent.children]
+        taken_spots = []
+        for item in self.item_parent.children:
+            gx = getattr(item, "grid_x", None)
+            gy = getattr(item, "grid_y", None)
+            if gx is None or gy is None:
+                gx, gy = self.world_to_grid(item.x, item.y)
+                item.grid_x, item.grid_y = gx, gy
+            taken_spots.append((gx, gy))
         
         for y in range(self.INVENTORY_HEIGHT):
             for x in range(self.INVENTORY_WIDTH):
@@ -205,11 +292,19 @@ class Inventory(Entity):
             print("L'inventaire est plein!")
             return
         
+        # Convertit la case de grille en position écran alignée
+        gx, gy = free_spot
+        world_pos = self.grid_to_world(gx, gy)
+
         item = InventoryItem(
             parent = self.item_parent,
             item_name = item_name,
-            position = free_spot
+            position = world_pos
         )
+        # Mémorise la case de grille de l'item
+        item.grid_x, item.grid_y = gx, gy
+        # Visibilité calée sur le panneau principal
+        item.visible = iPan.visible
         
         # Créer une référence à self pour que le drop puisse y accéder
         item._inventory = self
@@ -224,6 +319,8 @@ class Inventory(Entity):
 def init_inventory():
     """Initialise l'inventaire et crée les slots"""
     inventory = Inventory()
+    # Mémorise l'instance principale de l'inventaire (celle qui contient les items)
+    Inventory.instance = inventory
     
     # Debug: Vérifier que texture_paths est rempli
     print(f"DEBUG: texture_paths contient {len(texture_paths)} entrées")
