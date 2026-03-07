@@ -314,33 +314,45 @@ class Inventory(Entity):
         item.drop = lambda: original_drop(self)
 
     
+    def passage_inventaire_hotbar(self):
+        """Déplace un item de la hotbar vers l'inventaire"""
+        for item in self.item_parent.children:
+            if item.onHotbar:
+                item.passage_hotbar_inventaire()
+                break
+    
 
+class hotbar(Entity):
+    """Gère l'affichage logique de la hotbar"""
+    scalar = hotbar.scale_y * 0.9
+    rowFit = 9
 
-class hotbarItem(Draggable):
-    def __init__(this, parent, item_name, **kwargs):
-        this.item_name = item_name
-        super().__init__(
-            parent = parent,
-            model = 'quad',
-            texture = texture_paths[item_name],
-            color = color.white,
-            origin = (0, 0),
-            z = -.5
-        )
+    def __init__(self):
+        super().__init__()
+        self.model = "quad"
+        self.scale_y = self.scalar
+        self.scale_x = self.scale_y
+        self.color = color.white
+        self.texture = None
+        self.z = -1
+        self.onHotbar = True
 
-    def _on_drag(self):
-        self.original_position = (self.x, self.y)
-        self.z -= .05
-
-    def _on_drop(self, inventory):
-        self._snap_to_grid(inventory)
-        self.z += .05
-
-    def _snap_to_grid(self, inventory):
-        self.grid_x, self.grid_y = inventory.world_to_grid(self.x, self.y)
-        self.position = inventory.grid_to_world(self.grid_x, self.grid_y)
-        self.z = -0.5 
-# à continuer...
+    def passage_hotbar_inventaire(self):
+        """Déplace un item de la hotbar vers l'inventaire"""
+        if self.onHotbar:
+            self.onHotbar = False
+            self.visible = False
+            self.position = self._full_pos
+            self.scale = self._full_scale
+            self.y = self._hotbar_pos.y
+            self.x = self._hotbar_pos.x
+        else:
+            self.onHotbar = True
+            self.visible = True
+            self.position = self._full_pos
+            self.scale = self._full_scale
+            self.y = self._hotbar_pos.y
+            self.x = self._hotbar_pos.x
 
 def init_inventory():
     """Initialise l'inventaire et crée les slots"""
