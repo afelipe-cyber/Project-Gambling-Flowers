@@ -259,7 +259,15 @@ class Inventory(Entity):
         inv = getattr(Inventory, "instance", None)
         if inv is not None:
             for child in inv.item_parent.children:
-                child.visible = show
+                if show:
+                    child.visible = True
+                else:
+                    # Garder visibles les items de la hotbar (première rangée, grid_y == 0)
+                    gy = getattr(child, "grid_y", None)
+                    if gy is None:
+                        _, gy = inv.world_to_grid(child.x, child.y)
+                        child.grid_y = gy
+                    child.visible = show or (gy == 0)
 
     
     def find_free_spot(self):
@@ -300,8 +308,8 @@ class Inventory(Entity):
         )
         # Mémorise la case de grille de l'item
         item.grid_x, item.grid_y = gx, gy
-        # Visibilité calée sur le panneau principal
-        item.visible = iPan.visible
+        # Hotbar (grid_y == 0) toujours visible ; le reste suit le panneau
+        item.visible = iPan.visible or (gy == 0)
         
         # Créer une référence à self pour que le drop puisse y accéder
         item._inventory = self
