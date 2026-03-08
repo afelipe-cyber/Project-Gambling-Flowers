@@ -7,25 +7,12 @@ import random
 hotspots = []
 items = []
 
-hotbar = Entity(model="quad", parent=camera.ui)
 hot_cols = 9
 hot_wid = 1 / 16  # Largeur d'un slot ~ 1/10 de la hauteur de fenêtre.
 hb_wid = hot_wid * hot_cols
-hotbar.scale = Vec3(hb_wid, hot_wid, 0)
-hotbar.y = -0.45 + (hotbar.scale_y * 0.5)
-hotbar.color = color.light_gray
-hotbar.z = 0
 
-iPan = Entity(model="quad", parent=camera.ui)
-iPan.rows = 3
-iPan.scale_y = hotbar.scale_y * iPan.rows
-iPan.scale_x = hotbar.scale_x
-iPan.basePosY = hotbar.y + (hotbar.scale_y * 0.5) + (iPan.scale_y * 0.5)
-iPan.gap = hotbar.scale_y
-iPan.y = iPan.basePosY + iPan.gap
-iPan.color = color.light_gray
-iPan.z = 0
-iPan.visible = False
+hotbar = None
+iPan = None
 
 
 class InventoryItem(Draggable):
@@ -125,7 +112,7 @@ class InventoryItem(Draggable):
             gx < 0
             or gx >= inventory.INVENTORY_WIDTH
             or gy > 0
-            or gy <= -inventory.INVENTORY_HEIGHT
+            or gy <= -(inventory.INVENTORY_HEIGHT + 1)
         )
     
     def _restore_position(self):
@@ -185,11 +172,11 @@ class Inventory(Entity):
     Un mini-hotbar (la première rangée) est toujours visible. Appuyer sur
     "e" bascule l'affichage entre la hotbar seule et l'inventaire complet.
     """
-    scalar = hotbar.scale_y * 0.9
+    scalar = hot_wid * 0.9
     rowFit = 9
     # dimensions de l'inventaire (largeur = nombre de colonnes, hauteur = lignes)
     INVENTORY_WIDTH = hot_cols
-    INVENTORY_HEIGHT = iPan.rows
+    INVENTORY_HEIGHT = iPan.rows if iPan else 3
 
     def __init__(self):
         # utiliser une variable intermédiaire pour éviter de lire self.scale_y
@@ -225,9 +212,12 @@ class Inventory(Entity):
         """Convertit une coordonnée de grille (x, y) en position écran alignée sur les slots."""
         slot_size = Inventory.scalar * 1.1
 
-        # Centre de la première case (colonne 0, rangée 0)
-        base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
-        base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2
+        if gy == 0:  # hotbar
+            base_x = hotbar.x - hotbar.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+            base_y = hotbar.y
+        else:  # inventory
+            base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+            base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2 + Inventory.scalar * 1.1
 
         x = base_x + gx * slot_size
         y = base_y + gy * slot_size
@@ -238,8 +228,14 @@ class Inventory(Entity):
         """Convertit une position écran en indices de grille (x, y)."""
         slot_size = Inventory.scalar * 1.1
 
-        base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
-        base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2
+        if wy > hotbar.y + hotbar.scale_y * 0.5:
+            # inventory
+            base_x = iPan.x - iPan.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+            base_y = iPan.y + iPan.scale_y * 0.5 - Inventory.scalar * 0.5 * 1.2 + Inventory.scalar * 1.1
+        else:
+            # hotbar
+            base_x = hotbar.x - hotbar.scale_x * 0.5 + Inventory.scalar * 0.5 * 1.2
+            base_y = hotbar.y
 
         gx = round((wx - base_x) / slot_size)
         gy = round((wy - base_y) / slot_size)
@@ -277,10 +273,11 @@ class Inventory(Entity):
                 item.grid_x, item.grid_y = gx, gy
             taken_spots.append((gx, gy))
         
-        for y in range(self.INVENTORY_HEIGHT):
+        for y in range(self.INVENTORY_HEIGHT + 1):
+            spot_y = 0 if y == 0 else -y
             for x in range(self.INVENTORY_WIDTH):
-                if (x, -y) not in taken_spots:
-                    return (x, -y)
+                if (x, spot_y) not in taken_spots:
+                    return (x, spot_y)
         
         return None
     
@@ -322,40 +319,37 @@ class Inventory(Entity):
                 break
     
 
-class hotbar(Entity):
-    """Gère l'affichage logique de la hotbar"""
-    scalar = hotbar.scale_y * 0.9
-    rowFit = 9
+class Hotbar(Entity):
+    """Gère l'affichage et la logique de la hotbar"""
 
     def __init__(self):
-        super().__init__()
-        self.model = "quad"
-        self.scale_y = self.scalar
-        self.scale_x = self.scale_y
-        self.color = color.white
-        self.texture = None
-        self.z = -1
-        self.onHotbar = True
-
-    def passage_hotbar_inventaire(self):
-        """Déplace un item de la hotbar vers l'inventaire"""
-        if self.onHotbar:
-            self.onHotbar = False
-            self.visible = False
-            self.position = self._full_pos
-            self.scale = self._full_scale
-            self.y = self._hotbar_pos.y
-            self.x = self._hotbar_pos.x
-        else:
-            self.onHotbar = True
-            self.visible = True
-            self.position = self._full_pos
-            self.scale = self._full_scale
-            self.y = self._hotbar_pos.y
-            self.x = self._hotbar_pos.x
+        super().__init__(
+            model="quad",
+            parent=camera.ui,
+            scale=Vec3(hb_wid, hot_wid, 0),
+            y=-0.45 + (hot_wid * 0.5),
+            color=color.light_gray,
+            z=0
+        )
+        self.scalar = self.scale_y * 0.9
+        self.row_fit = 9
 
 def init_inventory():
     """Initialise l'inventaire et crée les slots"""
+    global hotbar, iPan
+    hotbar = Hotbar()
+    
+    iPan = Entity(model="quad", parent=camera.ui)
+    iPan.rows = 3
+    iPan.scale_y = hotbar.scale_y * iPan.rows
+    iPan.scale_x = hotbar.scale_x
+    iPan.basePosY = hotbar.y + (hotbar.scale_y * 0.5) + (iPan.scale_y * 0.5)
+    iPan.gap = hotbar.scale_y
+    iPan.y = iPan.basePosY + iPan.gap
+    iPan.color = color.light_gray
+    iPan.z = 0
+    iPan.visible = False
+    
     inventory = Inventory()
     # Réduit l'entité principale pour qu'elle ne dessine pas de grand carré au centre,
     # tout en gardant les autres instances (hotbar + grille) à leur taille normale.
