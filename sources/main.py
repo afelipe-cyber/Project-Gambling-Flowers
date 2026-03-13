@@ -1,7 +1,8 @@
 
 # Fix for ursina importlib.util compatibility issue
+import maps
 from importlib.util import *
-
+import InventaireBIS
 import ursina
 import ursina.prefabs.first_person_controller as fpc
 # from inventaire import *
@@ -18,67 +19,21 @@ app = ursina.Ursina()
 inventory = init_inventory()
 
 # Créer le terrain
-platform = ursina.Entity(model='plane', texture='grass', scale=(100, 1, 100), collider='mesh')
-
-def on_zone_click(zone):
-    # ajouter: doit vérifier si le joueur à assez d'argent pour acheter la zone
-    new_color = (zone.color[0] * 0.7, zone.color[1] * 0.7, zone.color[2] * 0.7, zone.color[3])
-    zone.color = new_color
-    zone.collider = None  # Désactiver le collider après le clic
-
-# Jardin séparé en zones de 18x15
-for i in range(2):  # 2 zones en largeur
-    for j in range(5):  # 5 zones en profondeur
-        x = 20 + (i - 0.5) * 18
-        z = 0 + (j - 2) * 15
-        zone = ursina.Entity(
-            model="plane",
-            scale=(18, 1, 15),
-            position=(x, 0.01, z),
-            color=ursina.color.rgb(139 / 255, 69 / 255, 19 / 255),
-            texture=None,
-            collider="mesh",
-        )
-        zone.on_click = lambda z=zone: on_zone_click(z)
+platform = maps.create_map()
+fence = maps.fence()
+stand_de_vente = maps.stand_de_vente()
 
 player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
 
 # Mettre à jour la référence globale du joueur pour l'inventaire
-import InventaireBIS
+
 InventaireBIS.player = player
 
-def fence():
-    for i in range(30):
-        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, 49), scale=(0.7, 4.5, 0.7), collider="mesh")
-    
-    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, 49), scale=(100, 0.43, 0.35), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, 49), scale=(100, 0.43, 0.35), collider="mesh")
-
-    for i in range(29):
-        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
-    
-    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
-
-    for i in range(30):
-        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, -48.875), scale=(0.7, 4.5, 0.7), collider="mesh")
-
-    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
-
-    for i in range(29):
-        vertical = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-48.875, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
-
-    horizontal_1 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, -49), scale=(100, 0.43, 0.35), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, -49), scale=(100, 0.43, 0.35), collider="mesh")
-
-fence()
 
 
-def stand_de_vente():
-    base = ursina.Entity(model="cube", color = color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="cobblestone", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
 
-stand_de_vente()
+
+
 
 
 # # Peupler l'inventaire avec quelques fleurs au démarrage
