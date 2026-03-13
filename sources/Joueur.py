@@ -1,12 +1,13 @@
 import random as rd
+import Inventaire
 class Joueur:
 
-    def __init__(self, nom, pv, atk, argent, inventaire ):
+    def __init__(self, nom, argent, inventaire ):
         self.nom = nom
-        self.pv = pv
-        self.atk = atk
+        # self.pv = pv
+        # self.atk = atk
         self.argent = 0
-        self.inventaire = {}
+        self.inventaire = Inventaire.Inventory()
 
     def recolte(self,fleur):
         #si la fleur a terminé sa croissance(statut=4), le joueur recupère la fleur
