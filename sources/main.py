@@ -1,13 +1,12 @@
-import maps
 from importlib.util import *
-import InventaireBIS
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-from InventaireBIS import *
-import PIL
-import time
-import random as rd
-import pygame as pg
+from Inventaire import *
+import maps
+# import PIL
+# import time
+# import random as rd
+# import pygame as pg
 
 
 app = ursina.Ursina()
@@ -24,7 +23,7 @@ player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
 
 # Mettre à jour la référence globale du joueur pour l'inventaire
 
-InventaireBIS.player = player
+Inventory.player = player
 
 
 

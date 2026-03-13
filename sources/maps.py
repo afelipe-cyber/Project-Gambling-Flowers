@@ -52,6 +52,6 @@ def on_zone_click(zone):
     zone.collider = None
 
 def stand_de_vente():
-    base = ursina.Entity(model="cube", color = ursina.color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="cobblestone", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
+    base = ursina.Entity(model="cube", color = ursina.color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="brick", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
 
 stand_de_vente()
