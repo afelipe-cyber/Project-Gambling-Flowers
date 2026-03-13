@@ -391,11 +391,21 @@ def init_inventory():
     Inventory.toggle()
     Inventory.toggle()
 
-    # Ajouter 7 items au démarrage
-    available_items = list(fleurs.keys())
+    # Ajouter 20 items au démarrage
+    available_items1=list(fleurs.keys())
+    available_items2=list(graines.keys())
+    available_items3=list(arrosoirs.keys())
     for _ in range(7):
-        item_name = random.choice(available_items)
-        inventory.add_item(item_name)
+        item_name1 = random.choice(available_items1)
+        inventory.add_item(item_name1)
+    for _ in range(7):
+        key = random.choice(available_items2)
+        item_name2 = graines[key].nom
+        inventory.add_item(item_name2)
+    for _ in range(6):
+        key = random.choice(available_items3)
+        item_name3 = arrosoirs[key].nom
+        inventory.add_item(item_name3)
     
     return inventory
 

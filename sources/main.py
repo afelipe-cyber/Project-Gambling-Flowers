@@ -4,6 +4,7 @@ import ursina
 from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
+import Objets
 import maps
 # import PIL
 # import time
@@ -63,7 +64,7 @@ stand_animation = ursina.Entity(
 )
 stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
-
+ 
 
 sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
 sun.look_at(ursina.Vec3(-1, -1, -10))
@@ -72,11 +73,6 @@ sun.look_at(ursina.Vec3(-1, -1, -10))
 # Mettre à jour la référence globale du joueur pour l'inventaire
 
 Inventory.player = player
-
-
-
-
-
 
 
 
