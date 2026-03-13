@@ -1,4 +1,5 @@
 from importlib.util import *
+from pathlib import Path
 import ursina
 from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
@@ -10,11 +11,14 @@ import maps
 # import pygame as pg
 from math import sin
 
+# Make assets resolvable from project root (not /sources).
+ursina.application.asset_folder = Path(__file__).resolve().parent.parent
+
 app = ursina.Ursina()
 
 # créer le ciel et la lumière
 shader = ursina.shaders.lit_with_shadows_shader
-sky = ursina.Sky(texture="../data/atm/sky3.jpg")
+sky = ursina.Sky(texture="data/atm/sky3.jpg")
 
 # Initialiser l'inventaire
 inventory = init_inventory()
@@ -22,9 +26,8 @@ inventory = init_inventory()
 # Créer le terrain
 platform = maps.create_map()
 maps.fence()
-maps.stand_de_vente()
 
-player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
+player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=20)
 
 
 
@@ -34,19 +37,36 @@ player = fpc.FirstPersonController(y=100, scale=2.5, speed=20)
 
 def stand_update():
     global stand, stand_animation, stand_parent
-    stand_parent.rotation_y += 40 * ursina.time.dt 
-    #stand_animation.rotation_y += 20 * ursina.time.dt
+    # Keep ATM static (no rotation)
+    # stand_parent.rotation_y += 40 * ursina.time.dt
+    # stand_animation.rotation_y += 40 * ursina.time.dt
     stand.y += sin(ursina.time.time() * 10) * 0.01
     stand_animation.y += sin(ursina.time.time() * 10) * 0.01
 
+    # Cycle flower textures if available.
+    if hasattr(stand_animation, "flower_textures") and stand_animation.flower_textures:
+        stand_animation._texture_i = int(ursina.time.time() * 1) % len(stand_animation.flower_textures)
+        stand_animation.texture = stand_animation.flower_textures[stand_animation._texture_i]
+
 stand_parent = ursina.Entity(position=(-10.55, 4, -20.95))
-stand = ursina.Entity(model="../data/atm/atm.obj", texture="../data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -0.4, 1.5), scale=(0.003, 0.003, 0.003), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
-stand_animation = ursina.Animation("../data/Fleurs/fleur", double_sided=True, parent=stand_parent, position=(0, -0.9, 1.51), scale=(2.5, 2.5, 2.5), fps=1, loop=True, autoplay=True)
+stand = ursina.Entity(model="data/atm/atm.obj", texture="data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -3, 1.51), scale=(60, 60, 60), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
+_flower_names = list(fleurs.keys()) if 'fleurs' in globals() else []
+_flower_textures = [texture_paths.get(name) for name in _flower_names if texture_paths.get(name)]
+stand_animation = ursina.Entity(
+    model="quad",
+    texture=_flower_textures[0] if _flower_textures else None,
+    double_sided=True,
+    parent=stand_parent,
+    position=(0, -0.9, 3),
+    scale=(2.5, 2.5, 2.5),
+    shader=ursina.shaders.lit_with_shadows_shader,
+)
+stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
 
 
-
-
+sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
+sun.look_at(ursina.Vec3(-1, -1, -10))
 
 
 # Mettre à jour la référence globale du joueur pour l'inventaire

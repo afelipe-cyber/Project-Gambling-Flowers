@@ -3,18 +3,19 @@ from importlib.util import *
 
 
 def create_map():
-    platform = ursina.Entity(model='plane', texture='grass', scale=(100, 1, 100), collider='mesh')
+    platform = ursina.Entity(model='cube', texture='grass', scale=(100, 1, 100), collider='box', shader= ursina.shaders.lit_with_shadows_shader)
     for i in range(2):  # 2 zones en largeur
         for j in range(5):  # 5 zones en profondeur
             x = 20 + (i - 0.5) * 18
             z = 0 + (j - 2) * 15
             zone = ursina.Entity(
-                model="plane",
-                scale=(18, 1, 15),
-                position=(x, 0.01, z),
+                model="cube",
+                scale=(18, 5, 15),
+                position=(x, -1.99, z),
                 color=ursina.color.rgb(139 / 255, 69 / 255, 19 / 255),
                 texture=None,
-                collider="mesh",
+                collider="box",
+                shader=ursina.shaders.lit_with_shadows_shader,
             )
             zone.on_click = lambda z=zone: on_zone_click(z)
 
@@ -51,7 +52,4 @@ def on_zone_click(zone):
     zone.color = new_color
     zone.collider = None
 
-def stand_de_vente():
-    base = ursina.Entity(model="cube", color = ursina.color.rgb(0 / 255, 90 / 255, 90 / 255) , texture="brick", position=(-20, 0, -20), scale=(20, 1, 30), collider="mesh")
 
-stand_de_vente()
