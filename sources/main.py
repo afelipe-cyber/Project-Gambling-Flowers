@@ -3,6 +3,7 @@ import ursina
 from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
+import Objets
 import maps
 # import PIL
 # import time
@@ -53,8 +54,11 @@ stand.update = stand_update
 
 Inventory.player = player
 
+# Planter quelques graines sur le terrain pour tester la croissance des plantes
 
-
+def planter_graines():
+    graines=Objets.graines
+    pass
 
 
 
