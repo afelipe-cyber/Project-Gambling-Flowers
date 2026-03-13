@@ -54,14 +54,6 @@ stand.update = stand_update
 
 Inventory.player = player
 
-# Planter quelques graines sur le terrain pour tester la croissance des plantes
-
-def planter_graines():
-    graines=Objets.graines
-    pass
-
-
-
 
 
 # # Peupler l'inventaire avec quelques fleurs au démarrage
