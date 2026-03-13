@@ -462,4 +462,112 @@ def inv_input(key, subject, mouse):
         key = azerty_map[key]
     _base_inv_input(key, subject, mouse)
 
-    
+
+def matrice_inventaire():
+    """Retourne une matrice représentant l'état de l'inventaire.
+
+    matrice[0]  -> ligne de hotbar (grid_y == 0)
+    matrice[1:] -> lignes de l'inventaire (grid_y == -1, -2, -3 ...)
+
+    Chaque case contient soit None, soit l'instance d'InventoryItem présente
+    à cet emplacement (on peut ensuite lire item.item_name, item.stack, etc.).
+    """
+    inv = getattr(Inventory, "instance", None)
+    if inv is None:
+        return []
+
+    width = Inventory.INVENTORY_WIDTH
+    height = Inventory.INVENTORY_HEIGHT  # nb de lignes d'inventaire (hors hotbar)
+
+    # matrice[0] = hotbar, matrice[1..height] = lignes d'inventaire
+    matrice = [[None for _ in range(width)] for _ in range(height + 1)]
+
+    for item in inv.item_parent.children:
+        # Récupérer les coordonnées de grille de l'item
+        gx = getattr(item, "grid_x", None)
+        gy = getattr(item, "grid_y", None)
+        if gx is None or gy is None:
+            gx, gy = inv.world_to_grid(item.x, item.y)
+            item.grid_x, item.grid_y = gx, gy
+
+        # Hotbar : gy == 0 -> ligne 0
+        # Inventaire : gy < 0 -> ligne -gy
+        if gy == 0:
+            row = 0
+        else:
+            row = -gy
+
+        if 0 <= row <= height and 0 <= gx < width:
+            matrice[row][gx] = item
+
+    # Stocker aussi sur la classe pour un accès direct ailleurs
+    Inventory.matrix = matrice
+    return matrice
+
+
+def synchroniser_inventaire_depuis_matrice(matrice=None):
+    """Applique une matrice d'inventaire à l'UI/logiciel.
+
+    - Si une case de la matrice est None -> l'item correspondant est supprimé.
+    - Si un item est déplacé dans la matrice -> il est déplacé visuellement.
+    - Les lignes suivent la même convention que `matrice_inventaire()` :
+      matrice[0] = hotbar, matrice[1..] = lignes de l'inventaire.
+
+    Utilisation typique :
+        m = matrice_inventaire()
+        m[2][5] = None  # supprimer l'item de la ligne 2, col 5
+        synchroniser_inventaire_depuis_matrice(m)
+    """
+    inv = getattr(Inventory, "instance", None)
+    if inv is None:
+        return
+
+    if matrice is None:
+        matrice = getattr(Inventory, "matrix", None)
+    if not matrice:
+        return
+
+    width = Inventory.INVENTORY_WIDTH
+    height = Inventory.INVENTORY_HEIGHT
+
+    # Ensemble des items qui doivent exister après synchro,
+    # mappés à leur position cible (gx, gy).
+    desired_positions = {}
+
+    for row_idx, row in enumerate(matrice):
+        if row is None:
+            continue
+        for gx, cell in enumerate(row):
+            if gx < 0 or gx >= width:
+                continue
+            if cell is None:
+                continue
+            # On ne gère que les vrais InventoryItem déjà existants.
+            if not isinstance(cell, InventoryItem):
+                continue
+
+            # Conversion ligne -> gy de grille
+            if row_idx == 0:
+                gy = 0
+            else:
+                gy = -row_idx
+
+            if -height <= gy <= 0:
+                desired_positions[cell] = (gx, gy)
+
+    # 1) Supprimer / retirer les items qui ne sont plus dans la matrice.
+    for item in list(inv.item_parent.children):
+        if item not in desired_positions:
+            destroy(item)
+
+    # 2) Mettre à jour la position des items gardés.
+    for item, (gx, gy) in desired_positions.items():
+        # Met à jour les coords de grille
+        item.grid_x, item.grid_y = gx, gy
+        # Met à jour la position monde alignée sur les slots
+        item.position = inv.grid_to_world(gx, gy)
+        # Visibilité : hotbar toujours visible, inventaire suit l'état du panneau
+        item.visible = iPan.visible or (gy == 0)
+
+    # Mémoriser la matrice actuelle sur la classe
+    Inventory.matrix = matrice
