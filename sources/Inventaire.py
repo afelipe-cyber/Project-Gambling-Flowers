@@ -83,6 +83,9 @@ class InventoryItem(Draggable):
             return
         
         self._swap_if_occupied(inventory)
+        
+        # Mettre à jour la matrice après le déplacement
+        matrice_inventaire()
     
     def _snap_to_grid(self, inventory):
         """Place l'item au centre de la case de grille la plus proche"""
@@ -207,6 +210,15 @@ class Inventory(Entity):
         self._full_scale = self.scale
         # calculer une position pour la hotbar (bas de l'écran)
         self._hotbar_pos = Vec3(0, -0.45 + (self.scale_y * 0.5), 0)
+        
+        # Initialiser la matrice de l'inventaire
+        self.matrix = []
+
+    def update(self):
+        """Vérifie automatiquement si la matrice a changé et synchronise si nécessaire."""
+        current_matrix = matrice_inventaire(set_matrix=False)
+        if current_matrix != self.matrix:
+            synchroniser_inventaire_depuis_matrice(self.matrix)
 
     def grid_to_world(self, gx, gy):
         """Convertit une coordonnée de grille (x, y) en position écran alignée sur les slots."""
@@ -407,6 +419,9 @@ def init_inventory():
         item_name3 = arrosoirs[key].nom
         inventory.add_item(item_name3)
     
+    # Initialiser la matrice après ajout des items
+    matrice_inventaire()
+    
     return inventory
 
 
@@ -463,7 +478,7 @@ def inv_input(key, subject, mouse):
     _base_inv_input(key, subject, mouse)
 
 
-def matrice_inventaire():
+def matrice_inventaire(set_matrix=True):
     """Retourne une matrice représentant l'état de l'inventaire.
 
     matrice[0]  -> ligne de hotbar (grid_y == 0)
@@ -500,8 +515,19 @@ def matrice_inventaire():
         if 0 <= row <= height and 0 <= gx < width:
             matrice[row][gx] = item
 
-    # Stocker aussi sur la classe pour un accès direct ailleurs
-    Inventory.matrix = matrice
+    # Stocker aussi sur l'instance pour un accès direct ailleurs
+    if set_matrix:
+        inv.matrix = matrice
+        # Afficher la matrice pour debug
+        print("Matrice de l'inventaire :")
+        for i, row in enumerate(matrice):
+            row_str = []
+            for cell in row:
+                if cell is None:
+                    row_str.append("None")
+                else:
+                    row_str.append(cell.item_name)
+            print(f"Ligne {i}: {row_str}")
     return matrice
 
 
@@ -523,7 +549,7 @@ def synchroniser_inventaire_depuis_matrice(matrice=None):
         return
 
     if matrice is None:
-        matrice = getattr(Inventory, "matrix", None)
+        matrice = getattr(inv, "matrix", None)
     if not matrice:
         return
 
@@ -569,5 +595,38 @@ def synchroniser_inventaire_depuis_matrice(matrice=None):
         # Visibilité : hotbar toujours visible, inventaire suit l'état du panneau
         item.visible = iPan.visible or (gy == 0)
 
-    # Mémoriser la matrice actuelle sur la classe
-    Inventory.matrix = matrice
+    # Mémoriser la matrice actuelle sur l'instance
+    inv.matrix = matrice
+
+
+# ==========================
+# test
+# ==========================
+
+# if __name__ == "__main__":
+#     from ursina import *
+#     from Objets import *
+    
+#     app = Ursina()
+    
+#     # Initialiser l'inventaire
+#     inventory = init_inventory()
+    
+#     # Créer un joueur basique pour les inputs
+#     player = Entity()
+#     player.enabled = True
+    
+#     # Créer une souris basique
+#     mouse = Entity()
+#     mouse.locked = True
+    
+#     # Fonction pour gérer les inputs
+#     def input_handler(key):
+#         inv_input(key, player, mouse)
+    
+#     # Assigner la fonction d'input
+#     app.input = input_handler
+    
+#     # Lancer l'application
+#     app.run()
+
