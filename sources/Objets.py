@@ -118,6 +118,44 @@ graines = {
 for nom, graine_obj in graines.items():
     texture_paths[graine_obj.nom] = graine_obj.texture
 
+class Arrosoirs:
+    def __init__(self, nom, rareté, texture=None):
+        self.nom = nom
+        self.rareté = rareté
+        self.texture = f"../data/Arrosoirs/{nom}.png"
+
+    def affichage_ar(self):
+        # Retourne une représentation unicode simple de l'arrosoir
+        return f"{self.nom} (Rareté: {self.rarete_texte()})"
+    
+    def rarete_texte(self):
+        # Retourne une représentation unicode simple en fonction de la rareté
+        if self.rareté == 1:
+            return "C"
+        elif self.rareté == 2:
+            return "R"
+        elif self.rareté == 3:
+            return "SR"
+        elif self.rareté == 0:
+            return "En cours de développement"
+    
+    def __str__(self):
+        return f"{self.nom} de rareté {self.rareté}"
+    
+arrosoirs = {
+        "Arrosoir rouillé": Arrosoirs("Arrosoir rouillé", 0, "Arrosoir rouillé"),
+        "Arrosoir rouillé rempli": Arrosoirs("Arrosoir rouillé rempli", 0, "Arrosoir rouillé rempli"),
+        "Arrosoir en fer": Arrosoirs("Arrosoir en fer", 0, "Arrosoir en fer"),
+        "Arrosoir en fer rempli": Arrosoirs("Arrosoir en fer rempli", 0, "Arrosoir en fer rempli"),
+        "Arrosoir en or": Arrosoirs("Arrosoir en or", 0, "Arrosoir en or"),
+        "Arrosoir en or rempli": Arrosoirs("Arrosoir en or rempli", 0, "Arrosoir en or rempli"),
+
+    }
+
+# Ajouter les arrosoirs au dictionnaire des textures
+for nom, arrosoir_obj in arrosoirs.items():
+    texture_paths[arrosoir_obj.nom] = arrosoir_obj.texture
+
 # Test
 if __name__ == "__main__":
     for nom, fleur in fleurs.items():
@@ -125,3 +163,6 @@ if __name__ == "__main__":
     
     for nom, graine in graines.items():
         print(graine.affichage_gr())
+
+    for nom, arrosoir in arrosoirs.items():
+        print(arrosoir.affichage_ar())
