@@ -1,11 +1,8 @@
-
-# Fix for ursina importlib.util compatibility issue
 import maps
 from importlib.util import *
 import InventaireBIS
 import ursina
 import ursina.prefabs.first_person_controller as fpc
-# from inventaire import *
 from InventaireBIS import *
 import PIL
 import time
