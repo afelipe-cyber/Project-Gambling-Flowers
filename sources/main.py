@@ -44,7 +44,7 @@ stand_parent = ursina.Entity(position=(-10.55, 4, -20.95))
 stand = ursina.Entity(model="../data/atm/atm.obj", texture="../data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -0.4, 1.5), scale=(0.003, 0.003, 0.003), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
 stand_animation = ursina.Animation("../data/Fleurs/fleur", double_sided=True, parent=stand_parent, position=(0, -0.9, 1.51), scale=(2.5, 2.5, 2.5), fps=1, loop=True, autoplay=True)
 stand.update = stand_update
-
+ 
 
 
 
