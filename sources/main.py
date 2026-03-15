@@ -37,7 +37,7 @@ player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=2
 
 
 def stand_update():
-    global stand, stand_animation, stand_parent
+    global stand, stand_animation, stand_parent, hint_text, player
     # Keep ATM static (no rotation)
     # stand_parent.rotation_y += 40 * ursina.time.dt
     # stand_animation.rotation_y += 40 * ursina.time.dt
@@ -48,6 +48,15 @@ def stand_update():
     if hasattr(stand_animation, "flower_textures") and stand_animation.flower_textures:
         stand_animation._texture_i = int(ursina.time.time() * 1) % len(stand_animation.flower_textures)
         stand_animation.texture = stand_animation.flower_textures[stand_animation._texture_i]
+
+    # Show a prompt when the player is close to the ATM.
+    # Adjust `proximity_threshold` to change how close the player must get.
+    proximity_threshold = 6.0
+    dx = player.x - stand.world_x
+    dy = player.y - stand.world_y
+    dz = player.z - stand.world_z
+    dist = (dx*dx + dy*dy + dz*dz) ** 0.5
+    hint_text.enabled = dist <= proximity_threshold
 
 stand_parent = ursina.Entity(position=(-10.55, 4, -20.95))
 stand = ursina.Entity(model="data/atm/atm.obj", texture="data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -3, 1.51), scale=(60, 60, 60), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
@@ -64,7 +73,17 @@ stand_animation = ursina.Entity(
 )
 stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
- 
+
+# Hint text shown when the player is close to the ATM
+hint_text = ursina.Text(
+    text="Click gauche",
+    position=(-0.5, 0.4),
+    origin=(0, 0),
+    background=True,
+    scale=2,
+    enabled=False,
+)
+
 
 sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
 sun.look_at(ursina.Vec3(-1, -1, -10))
