@@ -99,8 +99,7 @@ planted_flowers = []
 def build_flower_name_from_item(item_name):
     if not item_name:
         return None
-    if item_name in fleurs:
-        return item_name
+    # Accepte uniquement les graines : Graines de X ou Graines d'X
     if item_name.startswith("Graines de "):
         candidate = item_name.replace("Graines de ", "")
         if candidate in fleurs:
