@@ -130,14 +130,27 @@ def input(key):
         print("inv_input error:", e)
 
     # Check for right click on ATM when hint is visible
-    if key == 'right mouse down' and hint_text.enabled:
-        # Check if mouse is over the ATM
-        if stand.hovered:
-            # Open inventory
-            Inventory.toggle()
-            player.disable()
-            fpc.mouse.locked = False
-            player.cursor.visible = False
+    if key == 'right mouse down':
+        print(f"Right click detected, hint_text.enabled: {hint_text.enabled}, stand.hovered: {stand.hovered}")
+        if hint_text.enabled:
+            print("Hint is enabled")
+            if stand.hovered:
+                print("Stand is hovered, toggling inventory")
+                # Toggle inventory
+                Inventory.toggle()
+                # Toggle player controls based on player state
+                if player.enabled:
+                    player.disable()
+                    fpc.mouse.locked = False
+                    player.cursor.visible = False
+                else:
+                    player.enable()
+                    fpc.mouse.locked = True
+                    player.cursor.visible = True
+            else:
+                print("Stand not hovered")
+        else:
+            print("Hint not enabled")
 
 
 app.run()
