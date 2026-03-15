@@ -119,7 +119,7 @@ def plant_selected_from_hotbar():
 
     flower_name = build_flower_name_from_item(selected_item.item_name)
     if flower_name is None:
-        print(f"L'item sélectionné '{selected_item.item_name}' n'est pas une graine/fleur valide")
+        print(f"L'item sélectionné '{selected_item.item_name}' n'est pas une graine valide")
         return False
 
     # détection du point visé via raycast.
