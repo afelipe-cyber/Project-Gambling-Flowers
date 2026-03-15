@@ -13,6 +13,22 @@ hb_wid = hot_wid * hot_cols
 
 hotbar = None
 iPan = None
+selected_hotbar_index = 0
+
+
+def get_selected_hotbar_item():
+    inv = getattr(Inventory, "instance", None)
+    if inv is None:
+        return None
+
+    current_matrix = matrice_inventaire(set_matrix=False)
+    if not current_matrix:
+        return None
+
+    if selected_hotbar_index < 0 or selected_hotbar_index >= len(current_matrix[0]):
+        return None
+
+    return current_matrix[0][selected_hotbar_index]
 
 
 class InventoryItem(Draggable):
@@ -442,6 +458,9 @@ def _base_inv_input(key, subject, mouse):
                 h.color = color.white
             wnum -= 1
             hotspots[wnum].color = color.black
+            # synchronisation de la sélection de la hotbar
+            global selected_hotbar_index
+            selected_hotbar_index = wnum
             if hotspots[wnum].occupied:
                 subject.blockType = hotspots[wnum].item.blockType
     except Exception:

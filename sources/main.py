@@ -74,6 +74,80 @@ sun.look_at(ursina.Vec3(-1, -1, -10))
 
 Inventory.player = player
 
+# Planter des fleurs sur le terrain en fonction de la hotbar du joueur
+planted_flowers = []
+
+def build_flower_name_from_item(item_name):
+    if not item_name:
+        return None
+    if item_name in fleurs:
+        return item_name
+    if item_name.startswith("Graines de "):
+        candidate = item_name.replace("Graines de ", "")
+        if candidate in fleurs:
+            return candidate
+    if item_name.startswith("Graines d'"):
+        candidate = item_name.replace("Graines d'", "")
+        if candidate in fleurs:
+            return candidate
+    return None
+
+
+def plant_selected_from_hotbar():
+    selected_item = get_selected_hotbar_item()
+    if selected_item is None:
+        print("Aucun item sélectionné dans la hotbar")
+        return False
+
+    flower_name = build_flower_name_from_item(selected_item.item_name)
+    if flower_name is None:
+        print(f"L'item sélectionné '{selected_item.item_name}' n'est pas une graine/fleur valide")
+        return False
+
+    # détection du point visé via raycast.
+    hit_info = ursina.raycast(player.position, player.forward, distance=20, ignore=[player])
+    if not hit_info.hit:
+        print("Aucune surface visée pour planter")
+        return False
+
+    # planter uniquement sur terrain ou zone clickable.
+    if not hasattr(hit_info.entity, 'collider'):
+        print("Surface non valide pour plantation")
+        return False
+
+    plant_pos = hit_info.point + ursina.Vec3(0, 0.5, 0)
+    plant = ursina.Entity(
+        model='quad',
+        texture=texture_paths.get(flower_name),
+        color=ursina.color.white,
+        position=plant_pos,
+        scale=(1.5, 1.5, 1.5),
+        rotation_x=90,
+        collider='box',
+        shader=ursina.shaders.lit_with_shadows_shader
+    )
+    plant.flower_name = flower_name
+    plant.growth_stage = 0
+    plant.age = 0.0
+
+    planted_flowers.append(plant)
+
+    # Consomme la graine/fleur de l'inventaire.
+    if getattr(selected_item, 'stack', 1) > 1:
+        selected_item.stack -= 1
+        try:
+            selected_item._update_tooltip_text()
+        except Exception:
+            pass
+    else:
+        try:
+            destroy(selected_item)
+        except Exception:
+            pass
+
+    matrice_inventaire()
+    print(f"Plante '{flower_name}' plantée à {plant_pos}")
+    return True
 
 
 # # Peupler l'inventaire avec quelques fleurs au démarrage
@@ -109,5 +183,15 @@ def input(key):
         inv_input(key, player, fpc.mouse)
     except Exception as e:
         print("inv_input error:", e)
+
+    # Plantation avec clic gauche quand un item est sélectionné en hotbar
+    if key == 'left mouse down':
+        try:
+            planted = plant_selected_from_hotbar()
+            if not planted:
+                # en cas d'échec, on peut relancer un message simple
+                pass
+        except Exception as e:
+            print("Erreur de plantation :", e)
 
 app.run()
