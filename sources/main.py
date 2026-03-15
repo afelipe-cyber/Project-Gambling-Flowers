@@ -225,4 +225,9 @@ def input(key):
         else:
             print("Hint not enabled")
 
+    if key == 'left mouse down':
+        planted = plant_selected_from_hotbar()
+        if planted:
+            print("Plante semée depuis la hotbar")
+
 app.run()
