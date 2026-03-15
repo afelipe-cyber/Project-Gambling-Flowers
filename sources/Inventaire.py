@@ -538,7 +538,7 @@ def matrice_inventaire(set_matrix=True):
     if set_matrix:
         inv.matrix = matrice
         # Afficher la matrice pour debug
-        print("Matrice de l'inventaire :")
+        # print("Matrice de l'inventaire :")
         for i, row in enumerate(matrice):
             row_str = []
             for cell in row:
@@ -546,12 +546,32 @@ def matrice_inventaire(set_matrix=True):
                     row_str.append("None")
                 else:
                     row_str.append(cell.item_name)
-            print(f"Ligne {i}: {row_str}")
+            # print(f"Ligne {i}: {row_str}")
     return matrice
 
 
 def synchroniser_inventaire_depuis_matrice(matrice=None):
-    """Applique une matrice d'inventaire à l'UI/logiciel.
+    """Applique une matrice d'inventaire à l'UI/logiciel.if key == 'right mouse down':
+        print(f"Right click detected, hint_text.enabled: {hint_text.enabled}, stand.hovered: {stand.hovered}")
+        if hint_text.enabled:
+            print("Hint is enabled")
+            if stand.hovered:
+                print("Stand is hovered, toggling inventory")
+                # Toggle inventory
+                Inventory.toggle()
+                # Toggle player controls based on player state
+                if player.enabled:
+                    player.disable()
+                    fpc.mouse.locked = False
+                    player.cursor.visible = False
+                else:
+                    player.enable()
+                    fpc.mouse.locked = True
+                    player.cursor.visible = True
+            else:
+                print("Stand not hovered")
+        else:
+            print("Hint not enabled")
 
     - Si une case de la matrice est None -> l'item correspondant est supprimé.
     - Si un item est déplacé dans la matrice -> il est déplacé visuellement.
