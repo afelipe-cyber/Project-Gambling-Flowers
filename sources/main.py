@@ -76,7 +76,7 @@ stand.update = stand_update
 
 # Hint text shown when the player is close to the ATM
 hint_text = ursina.Text(
-    text="Click gauche",
+    text="Click droit",
     position=(-0.5, 0.4),
     origin=(0, 0),
     background=True,
@@ -128,5 +128,16 @@ def input(key):
         inv_input(key, player, fpc.mouse)
     except Exception as e:
         print("inv_input error:", e)
+
+    # Check for right click on ATM when hint is visible
+    if key == 'right mouse down' and hint_text.enabled:
+        # Check if mouse is over the ATM
+        if stand.hovered:
+            # Open inventory
+            Inventory.toggle()
+            player.disable()
+            fpc.mouse.locked = False
+            player.cursor.visible = False
+
 
 app.run()
