@@ -176,8 +176,7 @@ planted_flowers = []
 def build_flower_name_from_item(item_name):
     if not item_name:
         return None
-    if item_name in fleurs:
-        return item_name
+    # Accepte uniquement les graines : Graines de X ou Graines d'X
     if item_name.startswith("Graines de "):
         candidate = item_name.replace("Graines de ", "")
         if candidate in fleurs:
@@ -197,7 +196,7 @@ def plant_selected_from_hotbar():
 
     flower_name = build_flower_name_from_item(selected_item.item_name)
     if flower_name is None:
-        print(f"L'item sélectionné '{selected_item.item_name}' n'est pas une graine/fleur valide")
+        print(f"L'item sélectionné '{selected_item.item_name}' n'est pas une graine valide")
         return False
 
     # détection du point visé via raycast.
