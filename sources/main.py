@@ -85,13 +85,14 @@ hint_text = ursina.Text(
     enabled=False,
 )
 
-def make_10_wishes():
-    """Fait 10 tirages aléatoires et ajoute les fleurs à l'inventaire"""
-    flower_names = list(Objets.fleurs.keys())
-    for _ in range(10):
-        random_flower = random.choice(flower_names)
-        inventory.add_item(random_flower)
-    print("10 voeux réalisés! Fleurs ajoutées à l'inventaire.")
+def make_1_wishes():
+    """Fait 1 tirages aléatoires et ajoute une graine à l'inventaire"""
+    available_items2=list(graines.keys())
+    key = random.choice(available_items2)
+    item_name2 = graines[key].nom
+    inventory.add_item(item_name2)
+    matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
+    print("1 voeu réalisé! Fleur ajoutée à l'inventaire.")
 
 def toggle_atm_interface():
     """Affiche/cache l'interface ATM"""
@@ -137,10 +138,10 @@ atm_title = ursina.Text(
 
 atm_button = ursina.Button(
     parent=atm_panel,
-    text="Faire 10 voeux",
+    text="Faire 1 tirage",
     position=(0, -0.1),
     scale=(0.4, 0.1),
-    on_click=make_10_wishes,
+    on_click=make_1_wishes,
 )
 
 # Définir les couleurs après la création pour s'assurer qu'elles sont appliquées
