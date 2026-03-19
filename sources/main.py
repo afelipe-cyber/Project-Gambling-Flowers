@@ -6,6 +6,7 @@ import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
 import Objets
 import maps
+import random
 # import PIL
 # import time
 # import random as rd
@@ -83,6 +84,82 @@ hint_text = ursina.Text(
     scale=2,
     enabled=False,
 )
+
+def make_10_wishes():
+    """Fait 10 tirages aléatoires et ajoute les fleurs à l'inventaire"""
+    flower_names = list(Objets.fleurs.keys())
+    for _ in range(10):
+        random_flower = random.choice(flower_names)
+        inventory.add_item(random_flower)
+    print("10 voeux réalisés! Fleurs ajoutées à l'inventaire.")
+
+def toggle_atm_interface():
+    """Affiche/cache l'interface ATM"""
+    atm_panel.visible = not atm_panel.visible
+    if atm_panel.visible:
+        # Fermer l'inventaire si ouvert
+        if iPan and iPan.visible:
+            Inventory.toggle()
+        # S'assurer que les couleurs des boutons sont correctement appliquées
+        atm_button.color = ursina.color.green
+        atm_button.highlight_color = ursina.color.lime
+        atm_button.pressed_color = ursina.color.rgb(0, 100, 0)
+        close_button.color = ursina.color.red
+        close_button.highlight_color = ursina.color.pink
+        close_button.pressed_color = ursina.color.rgb(100, 0, 0)
+        # Désactiver les contrôles du joueur
+        player.disable()
+        fpc.mouse.locked = False
+        player.cursor.visible = False
+    else:
+        # Réactiver les contrôles du joueur
+        player.enable()
+        fpc.mouse.locked = True
+        player.cursor.visible = True
+
+# ATM Interface
+atm_panel = ursina.Panel(
+    parent=ursina.camera.ui,
+    model='quad',
+    scale=(0.6, 0.4),
+    position=(0, 0),
+    color=ursina.color.dark_gray,
+    visible=False,
+)
+
+atm_title = ursina.Text(
+    parent=atm_panel,
+    text="Distributeur Automatique",
+    position=(0, 0.15),
+    scale=1.5,
+    color=ursina.color.white,
+)
+
+atm_button = ursina.Button(
+    parent=atm_panel,
+    text="Faire 10 voeux",
+    position=(0, -0.1),
+    scale=(0.4, 0.1),
+    on_click=make_10_wishes,
+)
+
+# Définir les couleurs après la création pour s'assurer qu'elles sont appliquées
+atm_button.color = ursina.color.green
+atm_button.highlight_color = ursina.color.lime
+atm_button.pressed_color = ursina.color.rgb(0, 100, 0)
+
+close_button = ursina.Button(
+    parent=atm_panel,
+    text="Fermer",
+    position=(0, -0.25),
+    scale=(0.2, 0.08),
+    on_click=toggle_atm_interface,
+)
+
+# Définir les couleurs après la création pour s'assurer qu'elles sont appliquées
+close_button.color = ursina.color.red
+close_button.highlight_color = ursina.color.pink
+close_button.pressed_color = ursina.color.rgb(100, 0, 0)
 
 
 sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
@@ -208,26 +285,19 @@ def input(key):
         if hint_text.enabled:
             print("Hint is enabled")
             if stand.hovered:
-                print("Stand is hovered, toggling inventory")
-                # Toggle inventory
-                Inventory.toggle()
-                # Toggle player controls based on player state
-                if player.enabled:
-                    player.disable()
-                    fpc.mouse.locked = False
-                    player.cursor.visible = False
-                else:
-                    player.enable()
-                    fpc.mouse.locked = True
-                    player.cursor.visible = True
+                print("Stand is hovered, toggling ATM interface")
+                # Toggle ATM interface
+                toggle_atm_interface()
             else:
                 print("Stand not hovered")
         else:
             print("Hint not enabled")
 
     if key == 'left mouse down':
-        planted = plant_selected_from_hotbar()
-        if planted:
-            print("Plante semée depuis la hotbar")
+        # Ne pas planter si l'interface ATM est visible
+        if not atm_panel.visible:
+            planted = plant_selected_from_hotbar()
+            if planted:
+                print("Plante semée depuis la hotbar")
 
 app.run()
