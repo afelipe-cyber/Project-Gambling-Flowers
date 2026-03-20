@@ -27,7 +27,7 @@ sky = ursina.Sky(texture="data/atm/sky3.jpg")
 inventory = init_inventory()
 
 # Afficher argents du joueur
-joueur = Joueur.Joueur("Player", argent=100, inventaire=inventory)
+joueur = Joueur.Joueur("Player", argent=200, inventaire=inventory)
 argent_text = joueur.affichage_argent()
 
 
@@ -102,10 +102,17 @@ def make_1_wishes():
     available_items2=list(graines.keys())
     key = random.choice(available_items2)
     item_name2 = graines[key].nom
-    inventory.add_item(item_name2)
-    matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
-    joueur.argent -= 10  # Coût de 10 argents par tirage
-    print("1 voeu réalisé! Fleur ajoutée à l'inventaire.")
+    if joueur.argent >= 10  and inventory.find_free_spot() is not None:
+        inventory.add_item(item_name2)
+        matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
+        joueur.argent -= 10  # Coût de 10 argents par tirage
+        print("1 voeu réalisé! Fleur ajoutée à l'inventaire.")
+    else:
+        if joueur.argent < 10:
+            print("Pas assez d'argent pour faire un tirage.")
+        else:
+            print("Inventaire plein, impossible d'ajouter la fleur.")
+    
 
 def toggle_atm_interface():
     """Affiche/cache l'interface ATM"""
