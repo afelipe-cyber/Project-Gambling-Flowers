@@ -3,12 +3,13 @@ import ursina
 import Inventaire
 class Joueur:
 
-    def __init__(self, nom, argent, inventaire ):
+    def __init__(self, nom, argent=0, inventaire=None):
         self.nom = nom
         # self.pv = pv
         # self.atk = atk
-        self.argent = 0
-        self.inventaire = Inventaire.Inventory()
+        self.argent = argent
+        self.inventaire = inventaire if inventaire is not None else Inventaire.Inventory()
+        self.argent_text = None
 
     def recolte(self,fleur):
         #si la fleur a terminé sa croissance(statut=4), le joueur recupère la fleur
@@ -95,13 +96,16 @@ class Joueur:
     # def subir_degats(self, ennemi):
     #     self.pv -= ennemi.atk
 
-    @staticmethod
     def affichage_argent(self):
-        hint_text = ursina.Text(
-        text="Argent: " + str(self.argent),
-        position=(-0.5, 0.4),
-        origin=(0, 0),
-        background=True,
-        scale=2,
-        enabled=False,
-    )
+        if self.argent_text is None:
+            self.argent_text = ursina.Text(
+                text=f"Argent: {self.argent}",
+                position=(0.7, 0.45),
+                origin=(0, 0),
+                background=True,
+                scale=1,
+                enabled=True,
+            )
+        else:
+            self.argent_text.text = f"Argent: {self.argent}"
+        return self.argent_text
