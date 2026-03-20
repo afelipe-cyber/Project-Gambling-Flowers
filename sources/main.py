@@ -27,6 +27,12 @@ sky = ursina.Sky(texture="data/atm/sky3.jpg")
 inventory = init_inventory()
 
 # Afficher argents du joueur
+joueur = Joueur.Joueur("Player", argent=100, inventaire=inventory)
+argent_text = joueur.affichage_argent()
+
+
+def update():
+    joueur.affichage_argent()
 
 
 # Créer le terrain

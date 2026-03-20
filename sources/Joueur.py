@@ -100,10 +100,10 @@ class Joueur:
         if self.argent_text is None:
             self.argent_text = ursina.Text(
                 text=f"Argent: {self.argent}",
-                position=(-0.5, 0.4),
+                position=(0.7, 0.45),
                 origin=(0, 0),
                 background=True,
-                scale=2,
+                scale=1,
                 enabled=True,
             )
         else:
