@@ -7,6 +7,7 @@ from Inventaire import *
 import Objets
 import maps
 import random
+import Joueur
 # import PIL
 # import time
 # import random as rd
@@ -24,6 +25,9 @@ sky = ursina.Sky(texture="data/atm/sky3.jpg")
 
 # Initialiser l'inventaire
 inventory = init_inventory()
+
+# Afficher argents du joueur
+
 
 # Créer le terrain
 platform = maps.create_map()
