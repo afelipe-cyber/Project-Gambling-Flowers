@@ -1,4 +1,5 @@
 import random as rd
+import ursina
 import Inventaire
 class Joueur:
 
@@ -88,8 +89,19 @@ class Joueur:
         else:
             self.invnetaire[pull.nom] = pull
 
-    def attaquer(self, ennemi):
-        ennemi.pv -= self.atk
+    # def attaquer(self, ennemi):
+    #     ennemi.pv -= self.atk
 
-    def subir_degats(self, ennemi):
-        self.pv -= ennemi.atk
+    # def subir_degats(self, ennemi):
+    #     self.pv -= ennemi.atk
+
+    @staticmethod
+    def affichage_argent(self):
+        hint_text = ursina.Text(
+        text="Argent: " + str(self.argent),
+        position=(-0.5, 0.4),
+        origin=(0, 0),
+        background=True,
+        scale=2,
+        enabled=False,
+    )
