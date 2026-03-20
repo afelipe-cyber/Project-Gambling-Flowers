@@ -32,11 +32,6 @@ maps.fence()
 player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=20)
 
 
-
-
-
-
-
 def stand_update():
     global stand, stand_animation, stand_parent, hint_text, player
     # Keep ATM static (no rotation)
@@ -86,7 +81,7 @@ hint_text = ursina.Text(
 )
 
 def make_1_wishes():
-    """Fait 1 tirages aléatoires et ajoute une graine à l'inventaire"""
+    """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
     available_items2=list(graines.keys())
     key = random.choice(available_items2)
     item_name2 = graines[key].nom
@@ -244,35 +239,6 @@ def plant_selected_from_hotbar():
     matrice_inventaire()
     print(f"Plante '{flower_name}' plantée à {plant_pos}")
     return True
-
-
-# # Peupler l'inventaire avec quelques fleurs au démarrage
-# try:
-#     for _ in range(5):
-#         Item.new_item(rd.choice(mins))
-# except Exception as e:
-#     print('Erreur lors de la création d\'items d\'inventaire :', e)
-
-# # Aussi remplir quelques cases du panneau d'inventaire (non-hotbar)
-# try:
-#     inv_slots = [h for h in hotspots if not h.onHotbar]
-#     for i in range(min(5, len(inv_slots))):
-#         h = inv_slots[i]
-#         b = Item(rd.choice(mins))
-#         b.currentSpot = h
-#         items.append(b)
-#         h.item = b
-#         h.occupied = True
-#         h.stack = 1
-#         b.onHotbar = False
-#         b.visible = False
-#         b.x = h.x
-#         b.y = h.y
-#         b.update_stack_text()
-# except Exception as e:
-#     print('Erreur lors du remplissage du panneau d\'inventaire :', e)
-
-
 
 def input(key):
     try:
