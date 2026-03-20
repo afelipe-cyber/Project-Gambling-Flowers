@@ -104,6 +104,7 @@ def make_1_wishes():
     item_name2 = graines[key].nom
     inventory.add_item(item_name2)
     matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
+    joueur.argent -= 10  # Coût de 10 argents par tirage
     print("1 voeu réalisé! Fleur ajoutée à l'inventaire.")
 
 def toggle_atm_interface():
