@@ -65,6 +65,10 @@ stand_animation = ursina.Entity(
 stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
  
+maison = ursina.Entity(model="data/casa/casa.fbx", position=(0, 5, 0), scale=(0.01,0.01,0.01), collider="mesh")
+puit = ursina.Entity(model="data/casa/Well.blend", texture="data/casa/Well_texture.png", position=(10, 3, 10), scale=(5), collider="mesh")
+mushroom = ursina.Entity(model="data/casa/mushroom7.fbx", texture ="data/casa/shroom_Base_Color2.png", position=(10, 5, 0), scale=(0.02,0.02,0.02), double_sided=True, collider="mesh")
+house_draft = ursina.Entity(model="data/casa/house-draft.fbx", position=(10, 5, 20), scale=(1), collider="mesh")
 
 sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
 sun.look_at(ursina.Vec3(-1, -1, -10))
