@@ -70,6 +70,12 @@ stand_animation = ursina.Entity(
 stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
 
+# Scene entities (house, well, mushroom, etc.)
+maison = ursina.Entity(model="data/casa/casa.fbx", position=(0, 5, 0), scale=(0.5, 0.5, 0.5), shader=ursina.shaders.lit_with_shadows_shader)
+puit = ursina.Entity(model="data/casa/Well.blend", texture="data/casa/Well_texture.png", scale=(1, 1, 1), position=(0, 0, 0), shader=ursina.shaders.lit_with_shadows_shader)
+mushroom = ursina.Entity(model="data/casa/mushroom7.fbx", texture="data/casa/shader/mushroom_diff.png", position=(0, 0, 2), scale=(0.5, 0.5, 0.5), shader=ursina.shaders.lit_with_shadows_shader)
+house_draft = ursina.Entity(model="data/casa/house-draft.fbx", position=(10, 5, 0), scale=(1.5, 1.5, 1.5), shader=ursina.shaders.lit_with_shadows_shader)
+
 # Hint text shown when the player is close to the ATM
 hint_text = ursina.Text(
     text="Click droit",
