@@ -99,10 +99,14 @@ hint_text = ursina.Text(
 
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
-    available_items2=list(graines.keys())
-    key = random.choice(available_items2)
+    # Sélectionner uniquement les graines de rareté Rare (2), Epic (3) ou Légendaire (4)
+    available_items2 = [key for key in graines.keys() if graines[key].rareté in [2, 3, 4]]
+    # Poids : Rare = 90%, Epic = 9%, Légendaire = 1%
+    weights = [90 if graines[key].rareté == 2 else 9 if graines[key].rareté == 3 else 1 for key in available_items2]
+    
+    key = random.choices(available_items2, weights=weights, k=1)[0]
     item_name2 = graines[key].nom
-    if joueur.argent >= 10  and inventory.find_free_spot() is not None:
+    if joueur.argent >= 10 and inventory.find_free_spot() is not None:
         inventory.add_item(item_name2)
         matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
         joueur.argent -= 10  # Coût de 10 argents par tirage
