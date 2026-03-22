@@ -11,15 +11,13 @@ class Fleurs:
     def rarete_texte(self):
         # Retourne une représentation unicode simple en fonction de la rareté
         if self.rareté == 1:
-            return "C"
+            return "Commun"
         elif self.rareté == 2:
-            return "R"
+            return "Rare"
         elif self.rareté == 3:
-            return "SR"
+            return "Epic"
         elif self.rareté == 4:
-            return "SSR"
-        elif self.rareté == 5:
-            return "UR"
+            return "Légendaire"
         elif self.rareté == 0:
             return "En cours de développement"
         
@@ -73,15 +71,13 @@ class Graines:
     def rarete_texte(self):
         # Retourne une représentation unicode simple en fonction de la rareté
         if self.rareté == 1:
-            return "C"
+            return "Commun"
         elif self.rareté == 2:
-            return "R"
+            return "Rare"
         elif self.rareté == 3:
-            return "SR"
+            return "Epic"
         elif self.rareté == 4:
-            return "SSR"
-        elif self.rareté == 5:
-            return "UR"
+            return "Légendaire"
         elif self.rareté == 0:
             return "En cours de développement"
         
@@ -89,28 +85,28 @@ class Graines:
         return f"{self.nom} de rareté {self.rareté}"
     
 graines = {
-    "Graines de Cécilia": Graines("Graines de Cécilia", 0, "Graines de Cécilia"),
-    "Graines de Dendrobium sanglant": Graines("Graines de Dendrobium sanglant", 0, "Graines de Dendrobium sanglant"),
-    "Graines de Chrysanthèmes": Graines("Graines de Chrysanthèmes", 0, "Graines de Chrysanthèmes"),
-    "Graines de Fleur de Qingxin": Graines("Graines de Fleur de Qingxin", 0, "Graines de Fleur de Qingxin"),
-    "Graines de Fleur de soie": Graines("Graines de Fleur de soie", 0, "Graines de Fleur de soie"),
-    "Graines de Fleur funéraire": Graines("Graines de Fleur funéraire", 0, "Graines de Fleur funéraire"),
-    "Graines de Fleur sucrante": Graines("Graines de Fleur sucrante", 0, "Graines de Fleur sucrante"),
-    "Graines de Gueule de loup": Graines("Graines de Gueule de loup", 0, "Graines de Gueule de loup"),
-    "Graines d'Herbe à lampe": Graines("Graines d'Herbe à lampe", 0, "Graines d'Herbe à lampe"),
-    "Graines d'Herbe à sanglots": Graines("Graines d'Herbe à sanglots", 0, "Graines d'Herbe à sanglots"),
-    "Graines de Inteyvat": Graines("Graines de Inteyvat", 0, "Graines de Inteyvat"),
-    "Graines de Kalpalotus": Graines("Graines de Kalpalotus", 0, "Graines de Kalpalotus"),
-    "Graines de Lotus pluvieux": Graines("Graines de Lotus pluvieux", 0, "Graines de Lotus pluvieux"),
-    "Graines de Lys calla": Graines("Graines de Lys calla", 0, "Graines de Lys calla"),
-    "Graines de Lys lacmineux": Graines("Graines de Lys lacmineux", 0, "Graines de Lys lacmineux"),
-    "Graines de Lys verni": Graines("Graines de Lys verni", 0, "Graines de Lys verni"),
-    "Graines de Marcotte": Graines("Graines de Marcotte", 0, "Graines de Marcotte"),
-    "Graines de Muget bleu": Graines("Graines de Muget bleu", 0, "Graines de Muget bleu"),
-    "Graines de Padisachidée": Graines("Graines de Padisachidée", 0, "Graines de Padisachidée"),
-    "Graines de Rose arc-en-ciel": Graines("Graines de Rose arc-en-ciel", 0, "Graines de Rose arc-en-ciel"),
-    "Graines de Rose sumérienne": Graines("Graines de Rose sumérienne", 0, "Graines de Rose sumérienne"),
-    "Graines de Viparyas": Graines("Graines de Viparyas", 0, "Graines de Viparyas"),
+    "Graines de Cécilia": Graines("Graines de Cécilia", 1, "Graines de Cécilia"),
+    "Graines de Dendrobium sanglant": Graines("Graines de Dendrobium sanglant", 4, "Graines de Dendrobium sanglant"),
+    "Graines de Chrysanthèmes": Graines("Graines de Chrysanthèmes", 1, "Graines de Chrysanthèmes"),
+    "Graines de Fleur de Qingxin": Graines("Graines de Fleur de Qingxin", 2, "Graines de Fleur de Qingxin"),
+    "Graines de Fleur de soie": Graines("Graines de Fleur de soie", 3, "Graines de Fleur de soie"),
+    "Graines de Fleur funéraire": Graines("Graines de Fleur funéraire", 1, "Graines de Fleur funéraire"),
+    "Graines de Fleur sucrante": Graines("Graines de Fleur sucrante", 1, "Graines de Fleur sucrante"),
+    "Graines de Gueule de loup": Graines("Graines de Gueule de loup", 1, "Graines de Gueule de loup"),
+    "Graines d'Herbe à lampe": Graines("Graines d'Herbe à lampe", 2, "Graines d'Herbe à lampe"),
+    "Graines d'Herbe à sanglots": Graines("Graines d'Herbe à sanglots", 3, "Graines d'Herbe à sanglots"),
+    "Graines de Inteyvat": Graines("Graines de Inteyvat", 3, "Graines de Inteyvat"),
+    "Graines de Kalpalotus": Graines("Graines de Kalpalotus", 2, "Graines de Kalpalotus"),
+    "Graines de Lotus pluvieux": Graines("Graines de Lotus pluvieux", 4, "Graines de Lotus pluvieux"),
+    "Graines de Lys calla": Graines("Graines de Lys calla", 1, "Graines de Lys calla"),
+    "Graines de Lys lacmineux": Graines("Graines de Lys lacmineux", 3, "Graines de Lys lacmineux"),
+    "Graines de Lys verni": Graines("Graines de Lys verni", 2, "Graines de Lys verni"),
+    "Graines de Marcotte": Graines("Graines de Marcotte", 3, "Graines de Marcotte"),
+    "Graines de Muget bleu": Graines("Graines de Muget bleu", 1, "Graines de Muget bleu"),
+    "Graines de Padisachidée": Graines("Graines de Padisachidée", 2, "Graines de Padisachidée"),
+    "Graines de Rose arc-en-ciel": Graines("Graines de Rose arc-en-ciel", 4, "Graines de Rose arc-en-ciel"),
+    "Graines de Rose sumérienne": Graines("Graines de Rose sumérienne", 1, "Graines de Rose sumérienne"),
+    "Graines de Viparyas": Graines("Graines de Viparyas", 4, "Graines de Viparyas"),
 
 }
 
