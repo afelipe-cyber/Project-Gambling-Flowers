@@ -3,7 +3,7 @@ from importlib.util import *
 
 
 def create_map():
-    platform = ursina.Entity(model='cube', color=ursina.color.green, scale=(100, 1, 100), collider='box', shader= ursina.shaders.lit_with_shadows_shader)
+    platform = ursina.Entity(model='cube', texture='grass', scale=(100, 1, 100), collider='box', shader= ursina.shaders.lit_with_shadows_shader)
     for i in range(2):  # 2 zones en largeur
         for j in range(5):  # 5 zones en profondeur
             x = 20 + (i - 0.5) * 18
@@ -21,25 +21,25 @@ def create_map():
 
 def fence():
     for i in range(30):
-        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(49-3.375*i, 1, 49), scale=(0.7, 4.5, 0.7), collider="mesh")
+        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, 49), scale=(0.7, 4.5, 0.7), collider="mesh")
     
-    horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(0, 2.6, 49), scale=(100, 0.43, 0.35), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(0, 1.7, 49), scale=(100, 0.43, 0.35), collider="mesh")
+    horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, 49), scale=(100, 0.43, 0.35), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, 49), scale=(100, 0.43, 0.35), collider="mesh")
 
     for i in range(29):
-        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(49, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
+        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
     
     horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
     horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
 
     for i in range(30):
-        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(49-3.375*i, 1, -48.875), scale=(0.7, 4.5, 0.7), collider="mesh")
+        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(49-3.375*i, 1, -48.875), scale=(0.7, 4.5, 0.7), collider="mesh")
 
-    horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(-49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
-    horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(-49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
+    horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 2.6, 0), scale=(0.35, 0.43, 100), collider="mesh")
+    horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-49, 1.7, 0), scale=(0.35, 0.43, 100), collider="mesh")
 
     for i in range(29):
-        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , position=(49, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
+        vertical = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(-48.875, 1, 45.625-3.375*i), scale=(0.7, 4.5, 0.7), collider="mesh")
 
     horizontal_1 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 2.6, -49), scale=(100, 0.43, 0.35), collider="mesh")
     horizontal_2 = ursina.Entity(model="cube", color = ursina.color.rgb(169 / 255, 124 / 255, 75 / 255) , texture="brick", position=(0, 1.7, -49), scale=(100, 0.43, 0.35), collider="mesh")
