@@ -94,8 +94,21 @@ hint_text = ursina.Text(
     enabled=False,
 )
 
+# Variable globale pour gérer le délai entre les tirages
+tirage_en_cours = False
+
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
+    global tirage_en_cours
+    
+    # Vérifier si un tirage est déjà en cours
+    if tirage_en_cours:
+        print("Veuillez attendre avant de faire un nouveau tirage.")
+        return
+    
+    # Marquer le tirage comme en cours
+    tirage_en_cours = True
+    
     # Sélectionner uniquement les graines de rareté Rare (2), Epic (3) ou Légendaire (4)
     available_items2 = [key for key in graines.keys() if graines[key].rareté in [2, 3, 4]]
     # Poids : Rare = 90%, Epic = 9%, Légendaire = 1%
@@ -121,6 +134,14 @@ def make_1_wishes():
     
     # Fermer la fenêtre ATM après le tirage
     toggle_atm_interface()
+    
+    # Programmer la remise à zéro du délai après 5 secondes
+    def reset_tirage():
+        global tirage_en_cours
+        tirage_en_cours = False
+        print("Vous pouvez maintenant faire un nouveau tirage.")
+    
+    ursina.invoke(reset_tirage, delay=5)
 
 
 def show_seed_result(seed_name, rarity):

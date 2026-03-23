@@ -31,7 +31,7 @@ fleurs = {
 
     "Cécilia": Fleurs("Cécilia", 0, "Cécilia"),
     "Dendrobium sanglant": Fleurs("Dendrobium sanglant", 0, "Dendrobium sanglant"),
-    "Chrysanthème": Fleurs("Chrysanthème", 0, "Chrysanthème"),
+    "Chrysanthèmes": Fleurs("Chrysanthèmes", 0, "Chrysanthèmes"),
     "Fleur de Qingxin": Fleurs("Fleur de Qingxin", 0, "Fleur de Qingxin"),
     "Fleur de soie": Fleurs("Fleur de soie", 0, "Fleur de soie"),
     "Fleur funéraire": Fleurs("Fleur funéraire", 0, "Fleur funéraire"),
