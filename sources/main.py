@@ -40,7 +40,7 @@ player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=2
 
 
 def stand_update():
-    global stand, stand_animation, stand_parent, hint_text, player
+    global stand, stand_animation, stand_parent, hint_text, player, mushroom
     # Keep ATM static (no rotation)
     # stand_parent.rotation_y += 40 * ursina.time.dt
     # stand_animation.rotation_y += 40 * ursina.time.dt
@@ -52,14 +52,29 @@ def stand_update():
         stand_animation._texture_i = int(ursina.time.time() * 1) % len(stand_animation.flower_textures)
         stand_animation.texture = stand_animation.flower_textures[stand_animation._texture_i]
 
-    # Show a prompt when the player is close to the ATM.
-    # Adjust `proximity_threshold` to change how close the player must get.
+    # Show a prompt when the player is close to the ATM or mushroom.
     proximity_threshold = 6.0
-    dx = player.x - stand.world_x
-    dy = player.y - stand.world_y
-    dz = player.z - stand.world_z
-    dist = (dx*dx + dy*dy + dz*dz) ** 0.5
-    hint_text.enabled = dist <= proximity_threshold
+
+    # Distance to stand
+    dx_stand = player.x - stand.world_x
+    dy_stand = player.y - stand.world_y
+    dz_stand = player.z - stand.world_z
+    dist_stand = (dx_stand*dx_stand + dy_stand*dy_stand + dz_stand*dz_stand) ** 0.5
+
+    # Distance to mushroom
+    dx_mush = player.x - mushroom.world_x
+    dy_mush = player.y - mushroom.world_y
+    dz_mush = player.z - mushroom.world_z
+    dist_mush = (dx_mush*dx_mush + dy_mush*dy_mush + dz_mush*dz_mush) ** 0.5
+
+    if dist_stand <= proximity_threshold:
+        hint_text.text = "Click droit"
+        hint_text.enabled = True
+    elif dist_mush <= proximity_threshold:
+        hint_text.text = "Click droit"
+        hint_text.enabled = True
+    else:
+        hint_text.enabled = False
 
 stand_parent = ursina.Entity(position=(-10.55, 4, -20.95))
 stand = ursina.Entity(model="data/atm/atm.obj", texture="data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -3, 1.51), scale=(60, 60, 60), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
@@ -206,6 +221,90 @@ def toggle_atm_interface():
         fpc.mouse.locked = True
         player.cursor.visible = True
 
+
+def sell_selected_flower():
+    selected_item = get_selected_hotbar_item()
+    if not selected_item or not getattr(selected_item, 'item_name', None):
+        mushroom_panel.visible = False
+        print("Ce n'est pas une Fleur")
+        player.enable()
+        fpc.mouse.locked = True
+        player.cursor.visible = True
+        return
+
+    item_name = selected_item.item_name
+    rarete = None
+
+    # Les graines ne sont pas des fleurs utilisables pour la vente ici
+    if item_name in graines or item_name.lower().startswith("graines"):  # plus strict
+        mushroom_panel.visible = False
+        print("Ce n'est pas une Fleur")
+        player.enable()
+        fpc.mouse.locked = True
+        player.cursor.visible = True
+        return
+
+    if item_name in fleurs:
+        rarete = fleurs[item_name].rareté
+    else:
+        # Item n'est pas une fleur connue
+        mushroom_panel.visible = False
+        print("Ce n'est pas une Fleur")
+        player.enable()
+        fpc.mouse.locked = True
+        player.cursor.visible = True
+        return
+
+    gain = {1: 1, 2: 2, 3: 3, 4: 4}.get(rarete, 1)
+    joueur.argent += gain
+    print(f"{item_name} vendu ({'Commun' if rarete==1 else 'Rare' if rarete==2 else 'Epic' if rarete==3 else 'Légendaire'}), +{gain}€")
+
+    if getattr(selected_item, 'stack', 1) > 1:
+        selected_item.stack -= 1
+        try:
+            selected_item._update_tooltip_text()
+        except Exception:
+            pass
+    else:
+        try:
+            destroy(selected_item)
+        except Exception:
+            pass
+
+    matrice_inventaire()
+
+    # Fermer l'interface champignon après la vente
+    mushroom_panel.visible = False
+    player.enable()
+    fpc.mouse.locked = True
+    player.cursor.visible = True
+
+
+def toggle_mushroom_interface():
+    """Affiche/cache l'interface Champignon"""
+    mushroom_panel.visible = not mushroom_panel.visible
+    if mushroom_panel.visible:
+        # Fermer l'inventaire si ouvert
+        if iPan and iPan.visible:
+            Inventory.toggle()
+        # S'assurer que les couleurs des boutons sont correctement appliquées
+        mushroom_button.color = ursina.color.blue
+        mushroom_button.highlight_color = ursina.color.cyan
+        mushroom_button.pressed_color = ursina.color.rgb(0, 0, 100)
+        close_mushroom_button.color = ursina.color.red
+        close_mushroom_button.highlight_color = ursina.color.pink
+        close_mushroom_button.pressed_color = ursina.color.rgb(100, 0, 0)
+        # Désactiver les contrôles du joueur
+        player.disable()
+        fpc.mouse.locked = False
+        player.cursor.visible = False
+    else:
+        # Réactiver les contrôles du joueur
+        player.enable()
+        fpc.mouse.locked = True
+        player.cursor.visible = True
+
+
 # ATM Interface
 atm_panel = ursina.Panel(
     parent=ursina.camera.ui,
@@ -249,6 +348,40 @@ close_button = ursina.Button(
 close_button.color = ursina.color.red
 close_button.highlight_color = ursina.color.pink
 close_button.pressed_color = ursina.color.rgb(100, 0, 0)
+
+# Mushroom Interface
+mushroom_panel = ursina.Panel(
+    parent=ursina.camera.ui,
+    model='quad',
+    scale=(0.6, 0.4),
+    position=(0, 0),
+    color=ursina.color.dark_gray,
+    visible=False,
+)
+
+mushroom_title = ursina.Text(
+    parent=mushroom_panel,
+    text="Champignon Magique",
+    position=(0, 0.15),
+    scale=1.5,
+    color=ursina.color.white,
+)
+
+mushroom_button = ursina.Button(
+    parent=mushroom_panel,
+    text="Vendre La Fleurs dans la Main",
+    position=(0, 0.2),
+    scale=(0.6, 0.15),
+    on_click=sell_selected_flower,
+)
+
+close_mushroom_button = ursina.Button(
+    parent=mushroom_panel,
+    text="Fermer",
+    position=(0, -0.18),
+    scale=(0.2, 0.08),
+    on_click=toggle_mushroom_interface,
+)
 
 
 sun = ursina.DirectionalLight(shadow_map_resolution=(2048,2048))
@@ -340,21 +473,15 @@ def input(key):
         print("inv_input error:", e)
 
     if key == 'right mouse down':
-        print(f"Right click detected, hint_text.enabled: {hint_text.enabled}, stand.hovered: {stand.hovered}")
         if hint_text.enabled:
-            print("Hint is enabled")
             if stand.hovered:
-                print("Stand is hovered, toggling ATM interface")
-                # Toggle ATM interface
                 toggle_atm_interface()
-            else:
-                print("Stand not hovered")
-        else:
-            print("Hint not enabled")
+            elif mushroom.hovered:
+                toggle_mushroom_interface()
 
     if key == 'left mouse down':
-        # Ne pas planter si l'interface ATM est visible
-        if not atm_panel.visible:
+        # Ne pas planter si l'interface ATM ou champignon est visible
+        if not atm_panel.visible and not mushroom_panel.visible:
             planted = plant_selected_from_hotbar()
             if planted:
                 print("Plante semée depuis la hotbar")
