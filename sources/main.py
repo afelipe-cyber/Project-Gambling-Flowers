@@ -11,8 +11,12 @@ import Joueur
 # import PIL
 # import time
 # import random as rd
-# import pygame as pg
+import pygame as pg
 from math import sin
+import cv2
+import numpy as np
+from PIL import Image
+import io
 
 # Make assets resolvable from project root (not /sources).
 ursina.application.asset_folder = Path(__file__).resolve().parent.parent
@@ -97,6 +101,151 @@ hint_text = ursina.Text(
     enabled=False,
 )
 
+def play_pull_video(rarity):
+    """Joue la vidéo correspondante selon la rareté de la graine dans la fenêtre Ursina"""
+    # Mapper la rareté à la vidéo
+    video_map = {
+        2: "data/Videospull/Pull_3.mp4",  # Rare
+        3: "data/Videospull/Pull_2.mp4",  # Epic
+        4: "data/Videospull/Pull_1.mp4"   # Légendaire
+    }
+    
+    if rarity not in video_map:
+        return
+    
+    video_path = Path(__file__).resolve().parent.parent / video_map[rarity]
+    
+    try:
+        # Lire la vidéo avec OpenCV
+        cap = cv2.VideoCapture(str(video_path))
+        
+        if not cap.isOpened():
+            print(f"Erreur: Impossible d'ouvrir la vidéo: {video_path}")
+            return
+        
+        # Obtenir les propriétés de la vidéo
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_delay = 1.0 / fps if fps > 0 else 0.033  # en secondes
+        
+        # Extraire tous les frames et les convertir en PIL Images
+        frames = []
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            # Convertir BGR (OpenCV) en RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Convertir en PIL Image
+            pil_image = Image.fromarray(frame_rgb)
+            frames.append(pil_image)
+        
+        cap.release()
+        
+        if not frames:
+            print("Aucun frame trouvé dans la vidéo")
+            return
+        
+        # Créer un overlay fullscreen pour la vidéo
+        video_panel = ursina.Panel(
+            parent=ursina.camera.ui,
+            model='quad',
+            scale=(2, 2),
+            position=(0, 0),
+            color=ursina.color.black,
+            z=10
+        )
+        
+        # Créer l'entité pour afficher les frames
+        video_display = ursina.Entity(
+            parent=video_panel,
+            model='quad',
+            texture=None,
+            scale=(1.8, 1.8),
+            position=(0, 0),
+            z=1
+        )
+        
+        # Désactiver les contrôles du joueur pendant la vidéo
+        player.disable()
+        fpc.mouse.locked = False
+        
+        # Sauvegarder les frames dans des fichiers temporaires et afficher
+        import tempfile
+        import os
+        temp_dir = tempfile.gettempdir()
+        
+        start_time = ursina.time.time()
+        frame_index = 0
+        playing = True
+        
+        def update_video():
+            nonlocal frame_index, start_time, playing
+            
+            if not playing or frame_index >= len(frames):
+                return
+            
+            elapsed = ursina.time.time() - start_time
+            expected_frame = int(elapsed / frame_delay)
+            
+            if expected_frame >= len(frames):
+                playing = False
+                return
+            
+            if expected_frame > frame_index:
+                frame_index = expected_frame
+                # Sauvegarder le frame temporairement
+                temp_path = os.path.join(temp_dir, f"temp_frame_{frame_index}.png")
+                frames[frame_index].save(temp_path)
+                
+                # Charger la texture
+                video_display.texture = temp_path
+                
+                # Ajuster l'aspect ratio
+                img_w, img_h = frames[frame_index].size
+                aspect_ratio = img_w / img_h
+                
+                if aspect_ratio > 1:
+                    video_display.scale_x = 1.8
+                    video_display.scale_y = 1.8 / aspect_ratio
+                else:
+                    video_display.scale_x = 1.8 * aspect_ratio
+                    video_display.scale_y = 1.8
+        
+        # Ajouter la mise à jour à la boucle d'Ursina
+        original_update = globals().get('update', None)
+        
+        def update_with_video():
+            update_video()
+            if original_update:
+                original_update()
+        
+        app.update = update_with_video
+        
+        # Attendre que la vidéo finisse
+        while playing:
+            ursina.application.base.taskMgr.step()
+            if ursina.held_keys['esc']:
+                break
+        
+        # Restaurer l'update original
+        if original_update:
+            app.update = original_update
+        else:
+            del app.update
+        
+        # Nettoyer
+        ursina.destroy(video_panel)
+        player.enable()
+        fpc.mouse.locked = True
+        
+    except Exception as e:
+        print(f"Erreur lors de la lecture de la vidéo: {e}")
+        try:
+            player.enable()
+            fpc.mouse.locked = True
+        except:
+            pass
+
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
     # Sélectionner uniquement les graines de rareté Rare (2), Epic (3) ou Légendaire (4)
@@ -106,7 +255,12 @@ def make_1_wishes():
     
     key = random.choices(available_items2, weights=weights, k=1)[0]
     item_name2 = graines[key].nom
+    rarity = graines[key].rareté
+    
     if joueur.argent >= 10 and inventory.find_free_spot() is not None:
+        # Jouer la vidéo correspondante selon la rareté
+        play_pull_video(rarity)
+        
         inventory.add_item(item_name2)
         matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
         joueur.argent -= 10  # Coût de 10 argents par tirage
