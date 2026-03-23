@@ -8,6 +8,7 @@ import Objets
 import maps
 import random
 import Joueur
+from Objets import texture_paths
 import pygame as pg
 from math import sin
 
@@ -27,6 +28,9 @@ inventory = init_inventory()
 inventory.add_item("Arrosoir rouillé rempli")
 inventory.add_item("Arrosoir en fer rempli")
 inventory.add_item("Arrosoir en or rempli")
+inventory.add_item("Arrosoir rouillé")
+inventory.add_item("Arrosoir en fer")
+inventory.add_item("Arrosoir en or")
 matrice_inventaire()  # Mettre à jour l'affichage
 
 # Afficher argents du joueur
@@ -103,7 +107,35 @@ stand.update = stand_update
 
 # Scene entities (house, well, mushroom, etc.)
 #maison = ursina.Entity(model="data/casa/casa.fbx", texture="data/casa/casa.jpg", position=(0, 5, 0), scale=(0.1), shader=ursina.shaders.lit_with_shadows_shader)
-puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 1.2, 35), double_sided=True, collider="mesh", shader=ursina.shaders.lit_with_shadows_shader)
+puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 1.2, 35), double_sided=True, collider="box", shader=ursina.shaders.lit_with_shadows_shader)
+
+def on_well_click():
+    selected_item = get_selected_hotbar_item()
+    if selected_item and selected_item.item_name in ["Arrosoir rouillé", "Arrosoir en fer", "Arrosoir en or"]:
+        # Check distance
+        dist = ((player.position.x - puit.position.x)**2 + (player.position.z - puit.position.z)**2)**0.5
+        if dist < 5:  # Close enough
+            # Fill the watering can
+            if selected_item.item_name == "Arrosoir rouillé":
+                selected_item.item_name = "Arrosoir rouillé rempli"
+                selected_item.uses = 1
+            elif selected_item.item_name == "Arrosoir en fer":
+                selected_item.item_name = "Arrosoir en fer rempli"
+                selected_item.uses = 2
+            elif selected_item.item_name == "Arrosoir en or":
+                selected_item.item_name = "Arrosoir en or rempli"
+                selected_item.uses = 3
+            # Update texture and tooltip
+            selected_item.texture = texture_paths.get(selected_item.item_name, selected_item.item_name)
+            selected_item._update_tooltip_text()
+            print("Arrosoir rempli !")
+        else:
+            print("Trop loin du puit")
+    else:
+        print("Sélectionnez un arrosoir vide pour le remplir")
+
+puit.on_click = on_well_click
+
 mushroom = ursina.Entity(model="data/casa/mushroom7.fbx", texture="data/casa/shroom_Base_Color2.png", position=(-40, 2, 2), scale=(0.03), double_sided=True, collider="box", shader=ursina.shaders.lit_with_shadows_shader)
 #house_draft = ursina.Entity(model="data/casa/house-draft.fbx", texture="data/casa/1.jpg", position=(10, 5, 0), scale=(1.5, 1.5, 1.5), shader=ursina.shaders.lit_with_shadows_shader)
 
