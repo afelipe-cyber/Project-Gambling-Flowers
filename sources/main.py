@@ -78,11 +78,10 @@ stand_animation.flower_textures = _flower_textures
 stand.update = stand_update
 
 # Scene entities (house, well, mushroom, etc.)
-#maison = ursina.Entity(model="data/casa/casa.fbx", position=(0, 5, 0), scale=(0.5, 0.5, 0.5), shader=ursina.shaders.lit_with_shadows_shader)
-# use converted OBJ to avoid .blend import failure in Ursina
-puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 0.9, 35), double_sided=True, collider="mesh", shader=ursina.shaders.lit_with_shadows_shader)
-#mushroom = ursina.Entity(model="data/casa/mushroom7.fbx", texture="data/casa/shader/mushroom_diff.png", position=(0, 0, 2), scale=(0.5, 0.5, 0.5), shader=ursina.shaders.lit_with_shadows_shader)
-#house_draft = ursina.Entity(model="data/casa/house-draft.fbx", position=(10, 5, 0), scale=(1.5, 1.5, 1.5), shader=ursina.shaders.lit_with_shadows_shader)
+#maison = ursina.Entity(model="data/casa/casa.fbx", texture="data/casa/casa.jpg", position=(0, 5, 0), scale=(0.1), shader=ursina.shaders.lit_with_shadows_shader)
+puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 1.2, 35), double_sided=True, collider="mesh", shader=ursina.shaders.lit_with_shadows_shader)
+mushroom = ursina.Entity(model="data/casa/mushroom7.fbx", texture="data/casa/shroom_Base_Color2.png", position=(-40, 2, 2), scale=(0.03), double_sided=True, collider="box", shader=ursina.shaders.lit_with_shadows_shader)
+#house_draft = ursina.Entity(model="data/casa/house-draft.fbx", texture="data/casa/1.jpg", position=(10, 5, 0), scale=(1.5, 1.5, 1.5), shader=ursina.shaders.lit_with_shadows_shader)
 
 # Hint text shown when the player is close to the ATM
 hint_text = ursina.Text(
