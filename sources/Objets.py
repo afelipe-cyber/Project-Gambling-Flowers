@@ -127,24 +127,25 @@ class Arrosoirs:
     def rarete_texte(self):
         # Retourne une représentation unicode simple en fonction de la rareté
         if self.rareté == 1:
-            return "C"
+            return "Commun"
         elif self.rareté == 2:
-            return "R"
+            return "Rare"
         elif self.rareté == 3:
-            return "SR"
+            return "Epic"
         elif self.rareté == 0:
             return "En cours de développement"
+
     
     def __str__(self):
         return f"{self.nom} de rareté {self.rareté}"
     
 arrosoirs = {
-        "Arrosoir rouillé": Arrosoirs("Arrosoir rouillé", 0, "Arrosoir rouillé"),
-        "Arrosoir rouillé rempli": Arrosoirs("Arrosoir rouillé rempli", 0, "Arrosoir rouillé rempli"),
-        "Arrosoir en fer": Arrosoirs("Arrosoir en fer", 0, "Arrosoir en fer"),
-        "Arrosoir en fer rempli": Arrosoirs("Arrosoir en fer rempli", 0, "Arrosoir en fer rempli"),
-        "Arrosoir en or": Arrosoirs("Arrosoir en or", 0, "Arrosoir en or"),
-        "Arrosoir en or rempli": Arrosoirs("Arrosoir en or rempli", 0, "Arrosoir en or rempli"),
+        "Arrosoir rouillé": Arrosoirs("Arrosoir rouillé", 1, "Arrosoir rouillé"),
+        "Arrosoir rouillé rempli": Arrosoirs("Arrosoir rouillé rempli", 1, "Arrosoir rouillé rempli"),
+        "Arrosoir en fer": Arrosoirs("Arrosoir en fer", 2, "Arrosoir en fer"),
+        "Arrosoir en fer rempli": Arrosoirs("Arrosoir en fer rempli", 2, "Arrosoir en fer rempli"),
+        "Arrosoir en or": Arrosoirs("Arrosoir en or", 3, "Arrosoir en or"),
+        "Arrosoir en or rempli": Arrosoirs("Arrosoir en or rempli", 3, "Arrosoir en or rempli"),
 
     }
 

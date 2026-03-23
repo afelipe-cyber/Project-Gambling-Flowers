@@ -23,6 +23,12 @@ sky = ursina.Sky(texture="data/atm/sky3.jpg")
 # Initialiser l'inventaire
 inventory = init_inventory()
 
+# Ajouter des arrosoirs pour test
+inventory.add_item("Arrosoir rouillé rempli")
+inventory.add_item("Arrosoir en fer rempli")
+inventory.add_item("Arrosoir en or rempli")
+matrice_inventaire()  # Mettre à jour l'affichage
+
 # Afficher argents du joueur
 joueur = Joueur.Joueur("Player", argent=200, inventaire=inventory)
 maps.joueur = joueur
@@ -433,9 +439,10 @@ def plant_selected_from_hotbar():
         print("Aucune surface visée pour planter")
         return False
 
-    # planter uniquement sur terrain ou zone clickable.
-    if not hasattr(hit_info.entity, 'collider'):
-        print("Surface non valide pour plantation")
+    # planter uniquement sur les cercles de plantation
+    planting_spots = [spot for zone in maps.zones for spot in getattr(zone, 'planting_spots', [])]
+    if hit_info.entity not in planting_spots:
+        print("Cliquez sur un cercle vert pour planter")
         return False
 
     plant_pos = hit_info.point + ursina.Vec3(0, 0.5, 0)
