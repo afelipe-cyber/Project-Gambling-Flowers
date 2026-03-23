@@ -126,11 +126,11 @@ def make_1_wishes():
     # Marquer le tirage comme en cours
     tirage_en_cours = True
     
-    # Sélectionner uniquement les graines de rareté Rare (2), Epic (3) ou Légendaire (4)
-    available_items2 = [key for key in graines.keys() if graines[key].rareté in [2, 3, 4]]
-    # Poids : Rare = 90%, Epic = 9%, Légendaire = 1%
-    weights = [90 if graines[key].rareté == 2 else 9 if graines[key].rareté == 3 else 1 for key in available_items2]
-    
+    # Sélectionner uniquement les graines de rareté Commune (1), Rare (2), Epic (3) ou Légendaire (4)
+    available_items2 = [key for key in graines.keys() if graines[key].rareté in [1, 2, 3, 4]]
+    # Poids : Commune = 85%, Rare = 10%, Epic = 4%, Légendaire = 1%
+    weights = [85 if graines[key].rareté == 1 else 10 if graines[key].rareté == 2 else 4 if graines[key].rareté == 3 else 1 for key in available_items2]
+
     key = random.choices(available_items2, weights=weights, k=1)[0]
     item_name2 = graines[key].nom
     rarity = graines[key].rareté
@@ -165,14 +165,16 @@ def show_seed_result(seed_name, rarity):
     """Affiche l'image de la graine tirée avec son niveau de rareté"""
     # Déterminer le texte de rareté
     rarity_text = ""
-    if rarity == 2:
+    if rarity == 1:
+        rarity_text = "Commun"
+    elif rarity == 2:
         rarity_text = "Rare"
     elif rarity == 3:
         rarity_text = "Epic"
     elif rarity == 4:
         rarity_text = "Légendaire"
 
-        
+
     # Créer l'image de la graine
     seed_image = ursina.Entity(
         model='quad',
