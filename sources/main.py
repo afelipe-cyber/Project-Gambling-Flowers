@@ -171,7 +171,8 @@ def show_seed_result(seed_name, rarity):
         rarity_text = "Epic"
     elif rarity == 4:
         rarity_text = "Légendaire"
-    
+
+        
     # Créer l'image de la graine
     seed_image = ursina.Entity(
         model='quad',
