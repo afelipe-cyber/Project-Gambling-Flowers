@@ -25,6 +25,7 @@ inventory = init_inventory()
 
 # Afficher argents du joueur
 joueur = Joueur.Joueur("Player", argent=200, inventaire=inventory)
+maps.joueur = joueur
 argent_text = joueur.affichage_argent()
 
 
@@ -35,8 +36,10 @@ def update():
 # Créer le terrain
 platform = maps.create_map()
 maps.fence()
+maps.init_purchase_panel()
 
 player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=20)
+maps.player = player
 
 
 def stand_update():
@@ -255,7 +258,7 @@ def sell_selected_flower():
         player.cursor.visible = True
         return
 
-    gain = {1: 1, 2: 2, 3: 3, 4: 4}.get(rarete, 1)
+    gain = {1: 13, 2: 20, 3: 35, 4: 50}.get(rarete, 1)
     joueur.argent += gain
     print(f"{item_name} vendu ({'Commun' if rarete==1 else 'Rare' if rarete==2 else 'Epic' if rarete==3 else 'Légendaire'}), +{gain}€")
 
