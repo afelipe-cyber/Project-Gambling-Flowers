@@ -87,8 +87,27 @@ class InventoryItem(Draggable):
     def _update_tooltip_text(self):
         """Met à jour le texte du tooltip avec le nom, le stack et les utilisations"""
         name = self.item_name.replace('_', ' ').title()
-        if self.stack > 1:
-            name += f" x{self.stack}"
+
+        # Affiche la rareté uniquement pour les graines et les fleurs.
+        rarity = None
+        if self.item_name in graines:
+            rarity = graines[self.item_name].rareté
+        elif self.item_name in fleurs:
+            rarity = fleurs[self.item_name].rareté
+
+        rarity_text = None
+        if rarity == 1:
+            rarity_text = "Commun"
+        elif rarity == 2:
+            rarity_text = "Rare"
+        elif rarity == 3:
+            rarity_text = "Epic"
+        elif rarity == 4:
+            rarity_text = "Légendaire"
+
+        if rarity_text is not None:
+            name += f"\nRareté: {rarity_text}"
+
         if self.uses is not None:
             name += f" ({self.uses} utilisations)"
         self.tooltip = Tooltip(name)
@@ -157,7 +176,7 @@ class InventoryItem(Draggable):
             self.grid_x, self.grid_y = self.original_grid
     
     def _swap_if_occupied(self, inventory):
-        """Gère les collisions: fusionne si même type, échange sinon"""
+        """Gère les collisions: échange les positions sans jamais fusionner."""
         # Sauvegarder la position avant de potentiellement détruire self
         my_x = getattr(self, "grid_x", None)
         my_y = getattr(self, "grid_y", None)
@@ -176,25 +195,13 @@ class InventoryItem(Draggable):
                 other_item.grid_x, other_item.grid_y = ox, oy
 
             if other_item != self and ox == my_x and oy == my_y:
-                # Vérifier si c'est le même type d'item
-                if other_item.item_name == self.item_name:
-                    # Même type: augmenter le compteur de 1 et détruire cet item
-                    other_item.stack += self.stack
-                    # mettre à jour l'affichage (tooltip/label) du stack
-                    if hasattr(other_item, '_update_tooltip_text'):
-                        try:
-                            other_item._update_tooltip_text()
-                        except Exception:
-                            pass
-                    destroy(self)
-                else:
-                    # Type différent: échanger les cases de grille et les positions
-                    ogx, ogy = my_original_grid
-                    other_item.grid_x, other_item.grid_y = ogx, ogy
-                    self.grid_x, self.grid_y = my_x, my_y
+                # Échanger les cases de grille et les positions.
+                ogx, ogy = my_original_grid
+                other_item.grid_x, other_item.grid_y = ogx, ogy
+                self.grid_x, self.grid_y = my_x, my_y
 
-                    other_item.position = inventory.grid_to_world(ogx, ogy)
-                    self.position = inventory.grid_to_world(my_x, my_y)
+                other_item.position = inventory.grid_to_world(ogx, ogy)
+                self.position = inventory.grid_to_world(my_x, my_y)
                 return
     
 
