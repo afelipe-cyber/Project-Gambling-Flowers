@@ -153,6 +153,10 @@ tirage_en_cours = False
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
     global tirage_en_cours
+
+    if mushroom_panel.visible:
+        print("Fermez l'interface Champignon pour faire un tirage.")
+        return
     
     # Vérifier si un tirage est déjà en cours
     if tirage_en_cours:
@@ -241,6 +245,10 @@ def show_seed_result(seed_name, rarity):
 
 def toggle_atm_interface():
     """Affiche/cache l'interface ATM"""
+    if not atm_panel.visible and mushroom_panel.visible:
+        print("Fermez l'interface Champignon avant d'ouvrir l'ATM.")
+        return
+
     atm_panel.visible = not atm_panel.visible
     if atm_panel.visible:
         # Fermer l'inventaire si ouvert
@@ -265,6 +273,10 @@ def toggle_atm_interface():
 
 
 def sell_selected_flower():
+    if atm_panel.visible:
+        print("Fermez l'interface ATM pour vendre au Champignon.")
+        return
+
     selected_item = get_selected_hotbar_item()
     if not selected_item or not getattr(selected_item, 'item_name', None):
         mushroom_panel.visible = False
@@ -324,6 +336,10 @@ def sell_selected_flower():
 
 def toggle_mushroom_interface():
     """Affiche/cache l'interface Champignon"""
+    if not mushroom_panel.visible and atm_panel.visible:
+        print("Fermez l'interface ATM avant d'ouvrir le Champignon.")
+        return
+
     mushroom_panel.visible = not mushroom_panel.visible
     if mushroom_panel.visible:
         # Fermer l'inventaire si ouvert
@@ -589,6 +605,10 @@ def input(key):
         print("inv_input error:", e)
 
     if key == 'right mouse down':
+        # Empêcher de basculer vers l'autre interface tant qu'une interface est ouverte.
+        if atm_panel.visible or mushroom_panel.visible:
+            return
+
         if hint_text.enabled:
             if stand.hovered:
                 toggle_atm_interface()
