@@ -151,6 +151,57 @@ hint_text = ursina.Text(
 # Variable globale pour gérer le délai entre les tirages
 tirage_en_cours = False
 
+
+def has_any_watering_can(names):
+    inv = getattr(Inventory, "instance", None)
+    if inv is None:
+        return False
+    return any(getattr(item, 'item_name', None) in names for item in inv.item_parent.children)
+
+
+def replace_first_watering_can(old_names, new_name):
+    """Remplace le premier arrosoir trouvé par la nouvelle version."""
+    inv = getattr(Inventory, "instance", None)
+    if inv is None:
+        return False
+
+    for item in inv.item_parent.children:
+        if getattr(item, 'item_name', None) in old_names:
+            item.item_name = new_name
+            item.uses = None
+            item.texture = texture_paths.get(new_name, new_name)
+            try:
+                item._update_tooltip_text()
+            except Exception:
+                pass
+            return True
+    return False
+
+
+def apply_drawn_watering_can_upgrade(item_name):
+    """Applique la progression d'arrosoir sans empiler plusieurs niveaux."""
+    if item_name == "Arrosoir en fer":
+        # Priorité: remplacer un rouillé existant.
+        replaced = replace_first_watering_can(
+            ["Arrosoir rouillé", "Arrosoir rouillé rempli"],
+            "Arrosoir en fer"
+        )
+        if not replaced:
+            inventory.add_item("Arrosoir en fer")
+        return True
+
+    if item_name == "Arrosoir en or":
+        # Priorité: remplacer un fer, sinon un rouillé.
+        replaced = replace_first_watering_can(
+            ["Arrosoir en fer", "Arrosoir en fer rempli", "Arrosoir rouillé", "Arrosoir rouillé rempli"],
+            "Arrosoir en or"
+        )
+        if not replaced:
+            inventory.add_item("Arrosoir en or")
+        return True
+
+    return False
+
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
     global tirage_en_cours
@@ -167,23 +218,60 @@ def make_1_wishes():
     # Marquer le tirage comme en cours
     tirage_en_cours = True
     
-    # Sélectionner uniquement les graines de rareté Commune (1), Rare (2), Epic (3) ou Légendaire (4)
-    available_items2 = [key for key in graines.keys() if graines[key].rareté in [1, 2, 3, 4]]
-    # Poids : Commune = 85%, Rare = 10%, Epic = 4%, Légendaire = 1%
-    weights = [85 if graines[key].rareté == 1 else 10 if graines[key].rareté == 2 else 4 if graines[key].rareté == 3 else 1 for key in available_items2]
+    # Pool de tirage : graines majoritaires + faible chance d'obtenir un arrosoir.
+    draw_pool = []
 
-    key = random.choices(available_items2, weights=weights, k=1)[0]
-    item_name2 = graines[key].nom
-    rarity = graines[key].rareté
+    available_seed_keys = [key for key in graines.keys() if graines[key].rareté in [1, 2, 3, 4]]
+    for key in available_seed_keys:
+        seed = graines[key]
+        weight = 85 if seed.rareté == 1 else 10 if seed.rareté == 2 else 4 if seed.rareté == 3 else 1
+        draw_pool.append((seed.nom, seed.rareté, weight))
+
+    # Arrosoirs tirables avec progression:
+    # - Si or possédé: plus aucun arrosoir tirable
+    # - Sinon si fer possédé: seulement or tirable
+    # - Sinon: fer et or tirables
+    has_iron = has_any_watering_can(["Arrosoir en fer", "Arrosoir en fer rempli"])
+    has_gold = has_any_watering_can(["Arrosoir en or", "Arrosoir en or rempli"])
+
+    if has_gold:
+        drawable_cans = []
+    elif has_iron:
+        drawable_cans = ["Arrosoir en or"]
+    else:
+        drawable_cans = ["Arrosoir en fer", "Arrosoir en or"]
+
+    for can_name in drawable_cans:
+        if can_name not in arrosoirs:
+            continue
+        can = arrosoirs[can_name]
+        can_weight = 1 if can_name == "Arrosoir en fer" else 0.5
+        draw_pool.append((can.nom, can.rareté, can_weight))
+
+    choices = [entry[0] for entry in draw_pool]
+    weights = [entry[2] for entry in draw_pool]
+    item_name2 = random.choices(choices, weights=weights, k=1)[0]
+
+    rarity = 1
+    for name, rarity_value, _ in draw_pool:
+        if name == item_name2:
+            rarity = rarity_value
+            break
     
-    if joueur.argent >= 10 and inventory.find_free_spot() is not None:
+    # Les upgrades d'arrosoir peuvent remplacer un item existant sans case libre.
+    is_can_upgrade = item_name2 in ["Arrosoir en fer", "Arrosoir en or"]
+    can_receive = inventory.find_free_spot() is not None or is_can_upgrade
+
+    if joueur.argent >= 10 and can_receive:
         # Afficher le résultat du tirage
         show_seed_result(item_name2, rarity)
-        
-        inventory.add_item(item_name2)
+
+        upgraded = apply_drawn_watering_can_upgrade(item_name2)
+        if not upgraded:
+            inventory.add_item(item_name2)
         matrice_inventaire()  # Mettre à jour l'affichage de l'inventaire
         joueur.argent -= 10  # Coût de 10 argents par tirage
-        print("1 voeu réalisé! Fleur ajoutée à l'inventaire.")
+        print("1 voeu réalisé! Objet ajouté à l'inventaire.")
     else:
         if joueur.argent < 10:
             print("Pas assez d'argent pour faire un tirage.")
@@ -203,7 +291,7 @@ def make_1_wishes():
 
 
 def show_seed_result(seed_name, rarity):
-    """Affiche l'image de la graine tirée avec son niveau de rareté"""
+    """Affiche l'image de l'objet tiré avec son niveau de rareté"""
     # Déterminer le texte de rareté
     rarity_text = ""
     if rarity == 1:
@@ -216,10 +304,11 @@ def show_seed_result(seed_name, rarity):
         rarity_text = "Légendaire"
 
 
-    # Créer l'image de la graine
+    # Créer l'image de l'objet tiré
+    item_texture = texture_paths.get(seed_name, f"../data/Graines/{seed_name}.png")
     seed_image = ursina.Entity(
         model='quad',
-        texture=f"../data/Graines/{seed_name}.png",
+        texture=item_texture,
         scale=(0.3, 0.3),
         position=(0, 0.1),
         parent=ursina.camera.ui
