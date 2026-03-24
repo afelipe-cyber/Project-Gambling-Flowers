@@ -13,13 +13,28 @@ from math import sin
 
 # Make assets resolvable from project root (not /sources).
 ursina.application.asset_folder = Path(__file__).resolve().parent.parent
-
 app = ursina.Ursina()
-
 # créer le ciel et la lumière
 shader = ursina.shaders.lit_with_shadows_shader
 sky = ursina.Sky(texture="data/atm/sky3.jpg")
+pg.init()  # Initialiser Pygame pour la musique
+pg.mixer.music.load("data/Divers/Moonlight_Sonata.mp3")
+pg.mixer.music.set_volume(0.2)
+pg.mixer.music.play(-1)  # Jouer en boucle
 
+try:
+    achat_sound = pg.mixer.Sound("data/Divers/Achat.mp3")
+    achat_sound.set_volume(0.7)
+except Exception as e:
+    achat_sound = None
+    print(f"Impossible de charger le son d'achat: {e}")
+
+try:
+    vente_sound = pg.mixer.Sound("data/Divers/Vente.mp3")
+    vente_sound.set_volume(0.7)
+except Exception as e:
+    vente_sound = None
+    print(f"Impossible de charger le son de vente: {e}")
 # Initialiser l'inventaire
 inventory = init_inventory()
 inventory.add_item("Arrosoir rouillé")
@@ -273,6 +288,13 @@ def make_1_wishes():
         # Afficher le résultat du tirage
         show_seed_result(item_name2, rarity)
 
+        # Jouer le son d'achat du tirage.
+        if achat_sound is not None:
+            try:
+                achat_sound.play()
+            except Exception as e:
+                print(f"Erreur lecture son d'achat: {e}")
+
         upgraded = apply_drawn_watering_can_upgrade(item_name2)
         if not upgraded:
             inventory.add_item(item_name2)
@@ -409,6 +431,12 @@ def sell_selected_flower():
     gain = {1: 13, 2: 20, 3: 35, 4: 50}.get(rarete, 1)
     joueur.argent += gain
     print(f"{item_name} vendu ({'Commun' if rarete==1 else 'Rare' if rarete==2 else 'Epic' if rarete==3 else 'Légendaire'}), +{gain}€")
+
+    if vente_sound is not None:
+        try:
+            vente_sound.play()
+        except Exception as e:
+            print(f"Erreur lecture son de vente: {e}")
 
     if getattr(selected_item, 'stack', 1) > 1:
         selected_item.stack -= 1
