@@ -579,6 +579,10 @@ def plant_selected_from_hotbar():
     return True
 
 def input(key):
+    # Bloquer l'ouverture/fermeture de l'inventaire pendant les interfaces ATM/Champignon.
+    if key == 'e' and (atm_panel.visible or mushroom_panel.visible):
+        return
+
     try:
         inv_input(key, player, fpc.mouse)
     except Exception as e:
