@@ -476,6 +476,16 @@ def plant_selected_from_hotbar():
         return False
 
     plant_pos = ursina.Vec3(hit_info.entity.x, 1.8, hit_info.entity.z)
+    spot_pos = ursina.Vec3(hit_info.entity.x, hit_info.entity.y, hit_info.entity.z)
+
+    # Trouver la zone propriétaire du carré vert et le retirer de sa liste
+    spot_zone = None
+    for z in maps.zones:
+        if hit_info.entity in getattr(z, 'planting_spots', []):
+            spot_zone = z
+            z.planting_spots.remove(hit_info.entity)
+            break
+
     # Créer une entité parent pour la fleur
     plant = ursina.Entity(
         position=plant_pos,
@@ -507,6 +517,8 @@ def plant_selected_from_hotbar():
     plant.growth_stage = 0
     plant.age = 0.0
     plant._quads = [plant1, plant2]
+    plant._spot_pos = spot_pos
+    plant._zone = spot_zone
 
     planted_flowers.append(plant)
 
@@ -520,7 +532,29 @@ def plant_selected_from_hotbar():
         for quad in plant._quads:
             quad.texture = flower_texture
         plant.growth_stage = 1
-        print(f"'{flower_name}' a poussé !")
+        print(f"'{flower_name}' a poussé ! Cliquez dessus pour récolter.")
+
+        def harvest():
+            # Ajouter la fleur à l'inventaire
+            inventory.add_item(flower_name)
+            matrice_inventaire()
+            print(f"'{flower_name}' récoltée et ajoutée à l'inventaire !")
+            # Recréer le carré vert de plantation
+            if plant._zone is not None:
+                new_spot = ursina.Entity(
+                    model='cube',
+                    scale=(1, 3, 1),
+                    position=plant._spot_pos,
+                    color=ursina.color.green,
+                    collider='box',
+                )
+                plant._zone.planting_spots.append(new_spot)
+            # Retirer de la liste et détruire
+            if plant in planted_flowers:
+                planted_flowers.remove(plant)
+            destroy(plant)
+
+        plant.on_click = harvest
 
     ursina.invoke(bloom, delay=growth_delay)
 
