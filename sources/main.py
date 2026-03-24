@@ -208,7 +208,7 @@ def show_seed_result(seed_name, rarity):
     elif rarity == 2:
         rarity_text = "Rare"
     elif rarity == 3:
-        rarity_text = "Epic"
+        rarity_text = "Epique"
     elif rarity == 4:
         rarity_text = "Légendaire"
 
@@ -270,7 +270,7 @@ def sell_selected_flower():
     selected_item = get_selected_hotbar_item()
     if not selected_item or not getattr(selected_item, 'item_name', None):
         mushroom_panel.visible = False
-        print("Ce n'est pas une Fleur")
+        print("Ce n'est pas une fleur")
         player.enable()
         fpc.mouse.locked = True
         player.cursor.visible = True
@@ -282,7 +282,7 @@ def sell_selected_flower():
     # Les graines ne sont pas des fleurs utilisables pour la vente ici
     if item_name in graines or item_name.lower().startswith("graines"):  # plus strict
         mushroom_panel.visible = False
-        print("Ce n'est pas une Fleur")
+        print("Ce n'est pas une fleur")
         player.enable()
         fpc.mouse.locked = True
         player.cursor.visible = True
