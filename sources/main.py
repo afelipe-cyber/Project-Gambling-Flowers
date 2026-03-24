@@ -761,9 +761,9 @@ def plant_selected_from_hotbar():
 
     planted_flowers.append(plant)
 
-    # Délai de pousse selon la rareté : Commun=60s, Rare=100s, Epic=150s, Légendaire=300s
+    # Délai de pousse selon la rareté : Commun=30s, Rare=90s, Epic=130s, Légendaire=200s
     rarity = fleurs[flower_name].rareté
-    growth_delay = {1: 60, 2: 100, 3: 150, 4: 300}.get(rarity, 60)
+    growth_delay = {1: 30, 2: 90, 3: 130, 4: 200}.get(rarity, 60)
     plant.growth_delay = growth_delay
 
     # Supprimer le carré vert après plantation
