@@ -109,7 +109,7 @@ stand.update = stand_update
 #maison = ursina.Entity(model="data/casa/casa.fbx", texture="data/casa/casa.jpg", position=(0, 5, 0), scale=(0.1), shader=ursina.shaders.lit_with_shadows_shader)
 # use converted OBJ to avoid .blend import failure in Ursina
 puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 1.5, 35), double_sided=True, collider="mesh", shader=ursina.shaders.lit_with_shadows_shader)
-
+eau = ursina.Entity(model="quad", texture="data/casa/watta.jpg", rotation=(90, 0, 0), scale=(4.60), position=(-24.85, 4, 34.85), shader=ursina.shaders.lit_with_shadows_shader)
 def on_well_click():
     selected_item = get_selected_hotbar_item()
     if selected_item and selected_item.item_name in ["Arrosoir rouillé", "Arrosoir en fer", "Arrosoir en or"]:
