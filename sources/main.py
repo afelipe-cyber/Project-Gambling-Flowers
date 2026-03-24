@@ -4,7 +4,6 @@ import ursina
 from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
-import Objets
 import maps
 import random
 import Joueur
@@ -42,6 +41,7 @@ argent_text = joueur.affichage_argent()
 def update():
     joueur.affichage_argent()
     update_zone_dry_timers()
+    update_plant_growth()
 
 
 # Créer le terrain
@@ -453,7 +453,7 @@ Inventory.player = player
 
 # Planter des fleurs sur le terrain en fonction de la hotbar du joueur
 planted_flowers = []
-ZONE_REWATER_TIMEOUT = 120
+ZONE_REWATER_TIMEOUT = 60
 
 
 def destroy_plants_in_zone(zone):
@@ -483,6 +483,75 @@ def update_zone_dry_timers():
             if removed > 0:
                 print("Zone non arrosée depuis 2 minutes: pousses/fleurs détruites.")
             zone.dry_since = None
+
+
+def bloom_plant(plant):
+    """Fait passer une pousse en fleur mûre."""
+    if plant not in planted_flowers:
+        return
+    if getattr(plant, 'growth_stage', 0) != 0:
+        return
+
+    zone = getattr(plant, '_zone', None)
+    if zone is not None and not getattr(zone, 'is_watered', False):
+        return
+
+    flower_texture = texture_paths.get(plant.flower_name)
+    for quad in plant._quads:
+        quad.texture = flower_texture
+    plant.growth_stage = 1
+    print(f"'{plant.flower_name}' a poussé ! Cliquez dessus pour récolter.")
+
+    # Après 3 fleurs poussées, la zone arrosée repasse en marron (sec).
+    if zone is not None and getattr(zone, 'is_watered', False):
+        zone.grown_in_cycle = getattr(zone, 'grown_in_cycle', 0) + 1
+        if zone.grown_in_cycle >= 3:
+            maps.reset_zone_to_dry(zone, start_dry_timer=True)
+            print("La zone est redevenue marron. Ré-arrosez-la sous 2 minutes pour éviter la destruction des pousses/fleurs.")
+
+    def harvest():
+        if plant not in planted_flowers:
+            return
+
+        # Ajouter la fleur à l'inventaire
+        inventory.add_item(plant.flower_name)
+        matrice_inventaire()
+        print(f"'{plant.flower_name}' récoltée et ajoutée à l'inventaire !")
+
+        # Recréer le carré vert de plantation uniquement si la zone est arrosée.
+        plant_zone = getattr(plant, '_zone', None)
+        if plant_zone is not None and getattr(plant_zone, 'is_watered', False):
+            new_spot = ursina.Entity(
+                model='cube',
+                scale=(1, 3, 1),
+                position=plant._spot_pos,
+                color=ursina.color.green,
+                collider='box',
+            )
+            plant_zone.planting_spots.append(new_spot)
+
+        if plant in planted_flowers:
+            planted_flowers.remove(plant)
+        destroy(plant)
+
+    plant.on_click = harvest
+
+
+def update_plant_growth():
+    """La croissance avance uniquement quand la zone de la plante est arrosée."""
+    dt = ursina.time.dt
+    for plant in list(planted_flowers):
+        if getattr(plant, 'growth_stage', 0) != 0:
+            continue
+
+        zone = getattr(plant, '_zone', None)
+        if zone is not None and not getattr(zone, 'is_watered', False):
+            # Zone non arrosée: croissance en pause.
+            continue
+
+        plant.age += dt
+        if plant.age >= getattr(plant, 'growth_delay', 60):
+            bloom_plant(plant)
 
 def build_flower_name_from_item(item_name):
     if not item_name:
@@ -572,53 +641,7 @@ def plant_selected_from_hotbar():
     # Délai de pousse selon la rareté : Commun=60s, Rare=100s, Epic=150s, Légendaire=300s
     rarity = fleurs[flower_name].rareté
     growth_delay = {1: 60, 2: 100, 3: 150, 4: 300}.get(rarity, 60)
-
-    # Après le délai, remplacer la texture de pousse par celle de la fleur
-    def bloom():
-        if plant not in planted_flowers:
-            return
-        if plant._zone is not None and not getattr(plant._zone, 'is_watered', False):
-            return
-
-        flower_texture = texture_paths.get(flower_name)
-        for quad in plant._quads:
-            quad.texture = flower_texture
-        plant.growth_stage = 1
-        print(f"'{flower_name}' a poussé ! Cliquez dessus pour récolter.")
-
-        # Après 3 fleurs poussées, la zone arrosée repasse en marron (sec).
-        if plant._zone is not None and getattr(plant._zone, 'is_watered', False):
-            plant._zone.grown_in_cycle = getattr(plant._zone, 'grown_in_cycle', 0) + 1
-            if plant._zone.grown_in_cycle >= 3:
-                maps.reset_zone_to_dry(plant._zone, start_dry_timer=True)
-                print("La zone est redevenue marron. Ré-arrosez-la sous 2 minutes pour éviter la destruction des pousses/fleurs.")
-
-        def harvest():
-            if plant not in planted_flowers:
-                return
-
-            # Ajouter la fleur à l'inventaire
-            inventory.add_item(flower_name)
-            matrice_inventaire()
-            print(f"'{flower_name}' récoltée et ajoutée à l'inventaire !")
-            # Recréer le carré vert de plantation
-            if plant._zone is not None and getattr(plant._zone, 'is_watered', False):
-                new_spot = ursina.Entity(
-                    model='cube',
-                    scale=(1, 3, 1),
-                    position=plant._spot_pos,
-                    color=ursina.color.green,
-                    collider='box',
-                )
-                plant._zone.planting_spots.append(new_spot)
-            # Retirer de la liste et détruire
-            if plant in planted_flowers:
-                planted_flowers.remove(plant)
-            destroy(plant)
-
-        plant.on_click = harvest
-
-    ursina.invoke(bloom, delay=growth_delay)
+    plant.growth_delay = growth_delay
 
     # Supprimer le carré vert après plantation
     destroy(hit_info.entity)
