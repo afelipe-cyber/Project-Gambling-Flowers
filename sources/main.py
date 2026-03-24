@@ -475,15 +475,31 @@ def plant_selected_from_hotbar():
         print("Cliquez sur un cercle vert pour planter")
         return False
 
-    plant_pos = ursina.Vec3(hit_info.entity.x, 0.5, hit_info.entity.z)
+    plant_pos = ursina.Vec3(hit_info.entity.x, 1.5, hit_info.entity.z)
+    # Créer une entité parent pour la fleur
     plant = ursina.Entity(
+        position=plant_pos,
+        collider='box'
+    )
+    # Créer deux quads pour former une croix comme dans Minecraft
+    plant1 = ursina.Entity(
+        parent=plant,
         model='quad',
         texture=texture_paths.get(flower_name),
         color=ursina.color.white,
-        position=plant_pos,
-        scale=(1.5, 1.5, 1.5),
-        rotation_z=90,
-        collider='box',
+        scale=(2, 2, 2),
+        rotation_z=45,
+        double_sided=True,
+        shader=ursina.shaders.lit_with_shadows_shader
+    )
+    plant2 = ursina.Entity(
+        parent=plant,
+        model='quad',
+        texture=texture_paths.get(flower_name),
+        color=ursina.color.white,
+        scale=(2, 2, 2),
+        rotation_z=135,
+        double_sided=True,
         shader=ursina.shaders.lit_with_shadows_shader
     )
     plant.flower_name = flower_name
