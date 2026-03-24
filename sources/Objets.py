@@ -110,9 +110,9 @@ graines = {
 
 }
 
-# Ajouter les graines au dictionnaire des textures
-for nom, graine_obj in graines.items():
-    texture_paths[graine_obj.nom] = graine_obj.texture
+# # Test: ajouter les graines au dictionnaire des textures
+# for nom, graine_obj in graines.items():
+#     texture_paths[graine_obj.nom] = graine_obj.texture
 
 class Arrosoirs:
     def __init__(self, nom, rareté, texture=None):
@@ -149,9 +149,9 @@ arrosoirs = {
 
     }
 
-# Ajouter les arrosoirs au dictionnaire des textures
-for nom, arrosoir_obj in arrosoirs.items():
-    texture_paths[arrosoir_obj.nom] = arrosoir_obj.texture
+# # Test: ajouter les arrosoirs au dictionnaire des textures
+# for nom, arrosoir_obj in arrosoirs.items():
+#     texture_paths[arrosoir_obj.nom] = arrosoir_obj.texture
 
 # Test
 if __name__ == "__main__":
@@ -194,6 +194,6 @@ divers = {
 
 }
 
-# Ajouter les objets divers au dictionnaire des textures
-for nom, divers_obj in divers.items():
-    texture_paths[divers_obj.nom] = divers_obj.texture
+# # Test: ajouter les objets divers au dictionnaire des textures
+# for nom, divers_obj in divers.items():
+#     texture_paths[divers_obj.nom] = divers_obj.texture
