@@ -585,6 +585,8 @@ def destroy_plants_in_zone(zone):
     destroyed_count = 0
     for plant in list(planted_flowers):
         if getattr(plant, '_zone', None) is zone:
+            if getattr(plant, '_spot_pos', None) is not None:
+                maps.release_occupied_spot(zone, plant._spot_pos)
             if plant in planted_flowers:
                 planted_flowers.remove(plant)
             try:
@@ -637,22 +639,18 @@ def bloom_plant(plant):
         if plant not in planted_flowers:
             return
 
+        plant_zone = getattr(plant, '_zone', None)
+        if plant_zone is not None and getattr(plant, '_spot_pos', None) is not None:
+            maps.release_occupied_spot(plant_zone, plant._spot_pos)
+
         # Ajouter la fleur à l'inventaire
         inventory.add_item(plant.flower_name)
         matrice_inventaire()
         print(f"'{plant.flower_name}' récoltée et ajoutée à l'inventaire !")
 
         # Recréer le carré vert de plantation uniquement si la zone est arrosée.
-        plant_zone = getattr(plant, '_zone', None)
         if plant_zone is not None and getattr(plant_zone, 'is_watered', False):
-            new_spot = ursina.Entity(
-                model='cube',
-                scale=(1, 3, 1),
-                position=plant._spot_pos,
-                color=ursina.color.green,
-                collider='box',
-            )
-            plant_zone.planting_spots.append(new_spot)
+            maps.add_planting_spot(plant_zone, plant._spot_pos)
 
         if plant in planted_flowers:
             planted_flowers.remove(plant)
@@ -759,6 +757,9 @@ def plant_selected_from_hotbar():
     plant._quads = [plant1, plant2]
     plant._spot_pos = spot_pos
     plant._zone = spot_zone
+
+    if spot_zone is not None:
+        maps.register_occupied_spot(spot_zone, spot_pos)
 
     planted_flowers.append(plant)
 

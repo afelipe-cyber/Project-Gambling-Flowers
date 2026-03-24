@@ -21,12 +21,53 @@ current_zone = None
 def _ensure_zone_state(zone):
     if not hasattr(zone, 'planting_spots'):
         zone.planting_spots = []
+    if not hasattr(zone, 'occupied_spot_keys'):
+        zone.occupied_spot_keys = set()
     if not hasattr(zone, 'is_watered'):
         zone.is_watered = False
     if not hasattr(zone, 'grown_in_cycle'):
         zone.grown_in_cycle = 0
     if not hasattr(zone, 'dry_since'):
         zone.dry_since = None
+
+
+def _spot_position_key(position):
+    return (
+        round(position.x, 4),
+        round(position.y, 4),
+        round(position.z, 4),
+    )
+
+
+def register_occupied_spot(zone, position):
+    _ensure_zone_state(zone)
+    zone.occupied_spot_keys.add(_spot_position_key(position))
+
+
+def release_occupied_spot(zone, position):
+    _ensure_zone_state(zone)
+    zone.occupied_spot_keys.discard(_spot_position_key(position))
+
+
+def add_planting_spot(zone, position):
+    _ensure_zone_state(zone)
+    position_key = _spot_position_key(position)
+    if position_key in zone.occupied_spot_keys:
+        return None
+
+    for existing_spot in zone.planting_spots:
+        if _spot_position_key(existing_spot.position) == position_key:
+            return existing_spot
+
+    spot = ursina.Entity(
+        model='cube',
+        scale=(1, 3, 1),
+        position=position,
+        color=ursina.color.green,
+        collider='box',
+    )
+    zone.planting_spots.append(spot)
+    return spot
 
 
 def reset_zone_to_dry(zone, start_dry_timer=False):
@@ -61,14 +102,7 @@ def create_planting_spots(zone):
         radius = 5
         spot_x = zone.x + radius * math.cos(angle)
         spot_z = zone.z + radius * math.sin(angle)
-        spot = ursina.Entity(
-            model='cube',
-            scale=(1, 3, 1),
-            position=(spot_x, zone.y + 2, spot_z),
-            color=ursina.color.green,
-            collider='box',
-        )
-        zone.planting_spots.append(spot)
+        add_planting_spot(zone, ursina.Vec3(spot_x, zone.y + 2, spot_z))
 
 def init_purchase_panel():
     global purchase_panel
