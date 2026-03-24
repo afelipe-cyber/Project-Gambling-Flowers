@@ -475,7 +475,7 @@ def plant_selected_from_hotbar():
         print("Cliquez sur un cercle vert pour planter")
         return False
 
-    plant_pos = ursina.Vec3(hit_info.entity.x, 1.5, hit_info.entity.z)
+    plant_pos = ursina.Vec3(hit_info.entity.x, 1.8, hit_info.entity.z)
     # Créer une entité parent pour la fleur
     plant = ursina.Entity(
         position=plant_pos,
@@ -487,8 +487,8 @@ def plant_selected_from_hotbar():
         model='quad',
         texture=texture_paths.get(flower_name),
         color=ursina.color.white,
-        scale=(2, 2, 2),
-        rotation_z=45,
+        scale=(4, 4, 4),
+        rotation_y=45,
         double_sided=True,
         shader=ursina.shaders.lit_with_shadows_shader
     )
@@ -497,8 +497,8 @@ def plant_selected_from_hotbar():
         model='quad',
         texture=texture_paths.get(flower_name),
         color=ursina.color.white,
-        scale=(2, 2, 2),
-        rotation_z=135,
+        scale=(4, 4, 4),
+        rotation_y=135,
         double_sided=True,
         shader=ursina.shaders.lit_with_shadows_shader
     )
