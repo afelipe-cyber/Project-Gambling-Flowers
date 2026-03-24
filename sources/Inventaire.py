@@ -433,21 +433,23 @@ def init_inventory():
     Inventory.toggle()
     Inventory.toggle()
 
+
+# Test
     # Ajouter 20 items au démarrage
-    available_items1=list(fleurs.keys())
-    available_items2=list(graines.keys())
-    available_items3=list(arrosoirs.keys())
-    for _ in range(7):
-        item_name1 = random.choice(available_items1)
-        inventory.add_item(item_name1)
-    for _ in range(7):
-        key = random.choice(available_items2)
-        item_name2 = graines[key].nom
-        inventory.add_item(item_name2)
-    for _ in range(6):
-        key = random.choice(available_items3)
-        item_name3 = arrosoirs[key].nom
-        inventory.add_item(item_name3)
+    # available_items1=list(fleurs.keys())
+    # available_items2=list(graines.keys())
+    # available_items3=list(arrosoirs.keys())
+    # for _ in range(7):
+    #     item_name1 = random.choice(available_items1)
+    #     inventory.add_item(item_name1)
+    # for _ in range(7):
+    #     key = random.choice(available_items2)
+    #     item_name2 = graines[key].nom
+    #     inventory.add_item(item_name2)
+    # for _ in range(6):
+    #     key = random.choice(available_items3)
+    #     item_name3 = arrosoirs[key].nom
+    #     inventory.add_item(item_name3)
     
     # Initialiser la matrice après ajout des items
     matrice_inventaire()

@@ -22,14 +22,7 @@ sky = ursina.Sky(texture="data/atm/sky3.jpg")
 
 # Initialiser l'inventaire
 inventory = init_inventory()
-
-# Ajouter des arrosoirs pour test
-inventory.add_item("Arrosoir rouillé rempli")
-inventory.add_item("Arrosoir en fer rempli")
-inventory.add_item("Arrosoir en or rempli")
 inventory.add_item("Arrosoir rouillé")
-inventory.add_item("Arrosoir en fer")
-inventory.add_item("Arrosoir en or")
 matrice_inventaire()  # Mettre à jour l'affichage
 
 # Afficher argents du joueur
