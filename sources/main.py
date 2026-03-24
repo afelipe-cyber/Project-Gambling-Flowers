@@ -481,11 +481,12 @@ def plant_selected_from_hotbar():
         position=plant_pos,
         collider='box'
     )
-    # Créer deux quads pour former une croix comme dans Minecraft
+    # Afficher la Pousse à la plantation (la fleur poussera plus tard)
+    sprout_texture = texture_paths.get("Pousse")
     plant1 = ursina.Entity(
         parent=plant,
         model='quad',
-        texture=texture_paths.get(flower_name),
+        texture=sprout_texture,
         color=ursina.color.white,
         scale=(4, 4, 4),
         rotation_y=45,
@@ -495,14 +496,14 @@ def plant_selected_from_hotbar():
     plant2 = ursina.Entity(
         parent=plant,
         model='quad',
-        texture=texture_paths.get(flower_name),
+        texture=sprout_texture,
         color=ursina.color.white,
         scale=(4, 4, 4),
         rotation_y=135,
         double_sided=True,
         shader=ursina.shaders.lit_with_shadows_shader
     )
-    plant.flower_name = flower_name
+    plant.flower_name = flower_name  # La fleur finale est mémorisée
     plant.growth_stage = 0
     plant.age = 0.0
 

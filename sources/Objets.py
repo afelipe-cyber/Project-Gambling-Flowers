@@ -193,3 +193,7 @@ divers = {
     "Pousse": Divers("Pousse", 1, "Pousse"),
 
 }
+
+# Ajouter les objets divers au dictionnaire des textures
+for nom, divers_obj in divers.items():
+    texture_paths[divers_obj.nom] = divers_obj.texture
