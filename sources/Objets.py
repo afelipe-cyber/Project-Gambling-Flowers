@@ -163,3 +163,33 @@ if __name__ == "__main__":
 
     for nom, arrosoir in arrosoirs.items():
         print(arrosoir.affichage_ar())
+
+class Divers:
+    def __init__(self, nom, rareté, texture=None):
+        self.nom = nom
+        self.rareté = rareté
+        self.texture = f"../data/Divers/{nom}.png"
+
+    def affichage_div(self):
+        # Retourne une représentation unicode simple de l'objet divers
+        return f"{self.nom} (Rareté: {self.rarete_texte()})"
+    
+    def rarete_texte(self):
+        # Retourne une représentation unicode simple en fonction de la rareté
+        if self.rareté == 1:
+            return "Commun"
+        elif self.rareté == 2:
+            return "Rare"
+        elif self.rareté == 3:
+            return "Epic"
+        elif self.rareté == 0:
+            return "En cours de développement"
+
+    
+    def __str__(self):
+        return f"{self.nom} de rareté {self.rareté}"
+    
+divers = {
+    "Pousse": Divers("Pousse", 1, "Pousse"),
+
+}
