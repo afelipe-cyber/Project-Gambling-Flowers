@@ -92,7 +92,7 @@ graines = {
     "Graines de Fleur de soie": Graines("Graines de Fleur de soie", 3, "Graines de Fleur de soie"),
     "Graines de Fleur funéraire": Graines("Graines de Fleur funéraire", 1, "Graines de Fleur funéraire"),
     "Graines de Fleur sucrante": Graines("Graines de Fleur sucrante", 1, "Graines de Fleur sucrante"),
-    "Graines de Gueule de loup": Graines("Graines de Gueule de loup", 1, "Graines de Gueule de loup"),
+    "Graines de Gueule-de-loup": Graines("Graines de Gueule-de-loup", 1, "Graines de Gueule-de-loup"),
     "Graines d'Herbe à lampe": Graines("Graines d'Herbe à lampe", 2, "Graines d'Herbe à lampe"),
     "Graines d'Herbe à sanglots": Graines("Graines d'Herbe à sanglots", 3, "Graines d'Herbe à sanglots"),
     "Graines de Inteyvat": Graines("Graines de Inteyvat", 3, "Graines de Inteyvat"),
