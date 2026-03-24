@@ -1,7 +1,6 @@
 from importlib.util import *
 from pathlib import Path
 import ursina
-from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
 import maps
@@ -14,8 +13,7 @@ from math import sin
 # Make assets resolvable from project root (not /sources).
 ursina.application.asset_folder = Path(__file__).resolve().parent.parent
 app = ursina.Ursina()
-# créer le ciel et la lumière
-shader = ursina.shaders.lit_with_shadows_shader
+# créer le ciel
 sky = ursina.Sky(texture="data/atm/sky3.jpg")
 pg.init()  # Initialiser Pygame pour la musique
 pg.mixer.music.load("data/Divers/Moonlight_Sonata.mp3")
