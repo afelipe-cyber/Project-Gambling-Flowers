@@ -39,7 +39,7 @@ inventory.add_item("Arrosoir rouillé")
 matrice_inventaire()  # Mettre à jour l'affichage
 
 # Afficher argents du joueur
-joueur = Joueur.Joueur("Player", argent=200, inventaire=inventory)
+joueur = Joueur.Joueur("Player", argent=80, inventaire=inventory)
 maps.joueur = joueur
 argent_text = joueur.affichage_argent()
 
