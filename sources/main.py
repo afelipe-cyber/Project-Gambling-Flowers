@@ -90,7 +90,7 @@ def stand_update():
         hint_text.enabled = False
 
 stand_parent = ursina.Entity(position=(-10.55, 4, -20.95))
-stand = ursina.Entity(model="data/atm/atm.obj", texture="data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -3, 1.51), scale=(60, 60, 60), collider="box", shader=ursina.shaders.lit_with_shadows_shader)
+stand = ursina.Entity(model="data/atm/atm.obj", texture="data/atm/atm2.jpg", double_sided=True, parent=stand_parent, position=(0, -3, 1.51), scale=(60, 60, 60), collider="box", shader=ursina.shaders.lit_with_shadows_shader, )
 _flower_names = list(fleurs.keys()) if 'fleurs' in globals() else []
 _flower_textures = [texture_paths.get(name) for name in _flower_names if texture_paths.get(name)]
 stand_animation = ursina.Entity(
@@ -107,15 +107,14 @@ stand.update = stand_update
 
 # Scene entities (house, well, mushroom, etc.)
 #maison = ursina.Entity(model="data/casa/casa.fbx", texture="data/casa/casa.jpg", position=(0, 5, 0), scale=(0.1), shader=ursina.shaders.lit_with_shadows_shader)
+# use converted OBJ to avoid .blend import failure in Ursina
 puit = ursina.Entity(model="sources/models_compressed/Well.obj", texture="data/casa/Well_texture2.png", scale=(0.5), position=(-25, 1.5, 35), double_sided=True, collider="mesh", shader=ursina.shaders.lit_with_shadows_shader)
 
 def on_well_click():
     selected_item = get_selected_hotbar_item()
     if selected_item and selected_item.item_name in ["Arrosoir rouillé", "Arrosoir en fer", "Arrosoir en or"]:
-        # Check distance
         dist = ((player.position.x - puit.position.x)**2 + (player.position.z - puit.position.z)**2)**0.5
-        if dist < 5:  # Close enough
-            # Fill the watering can
+        if dist < 5:
             if selected_item.item_name == "Arrosoir rouillé":
                 selected_item.item_name = "Arrosoir rouillé rempli"
                 selected_item.uses = 1
@@ -125,7 +124,6 @@ def on_well_click():
             elif selected_item.item_name == "Arrosoir en or":
                 selected_item.item_name = "Arrosoir en or rempli"
                 selected_item.uses = 3
-            # Update texture and tooltip
             selected_item.texture = texture_paths.get(selected_item.item_name, selected_item.item_name)
             selected_item._update_tooltip_text()
             print("Arrosoir rempli !")
