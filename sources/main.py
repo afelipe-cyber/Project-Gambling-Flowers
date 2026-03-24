@@ -36,6 +36,19 @@ def update():
     update_zone_dry_timers()
     update_plant_growth()
 
+    # Bloque tout mouvement tant qu'une interface ATM/Champignon est ouverte.
+    if 'player' in globals():
+        ui_locked = (
+            ('atm_panel' in globals() and atm_panel.visible)
+            or ('mushroom_panel' in globals() and mushroom_panel.visible)
+        )
+        if ui_locked:
+            player.speed = 0
+            for move_key in ('w', 'a', 's', 'd', 'z', 'q'):
+                ursina.held_keys[move_key] = 0
+        else:
+            player.speed = PLAYER_DEFAULT_SPEED
+
 
 # Créer le terrain
 platform = maps.create_map()
@@ -43,6 +56,7 @@ maps.fence()
 maps.init_purchase_panel()
 
 player = fpc.FirstPersonController(position=(-10.55, 2, -10), scale=2.5, speed=20)
+PLAYER_DEFAULT_SPEED = player.speed
 maps.player = player
 
 
