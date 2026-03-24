@@ -38,6 +38,7 @@ class InventoryItem(Draggable):
         self.item_name = item_name
         self.original_position = None
         self.stack = 1  # Nombre d'items dans cette pile
+        self.uses = self._get_uses_for_item(item_name)  # Utilisations restantes pour les arrosoirs
         
         # Obtenir le chemin de texture depuis le dictionnaire
         texture_path = texture_paths.get(item_name, None)
@@ -67,16 +68,29 @@ class InventoryItem(Draggable):
         self.drag = self._on_drag
         self.drop = self._on_drop
     
+    def _get_uses_for_item(self, item_name):
+        """Retourne le nombre d'utilisations pour les arrosoirs remplis"""
+        if item_name == "Arrosoir rouillé rempli":
+            return 1
+        elif item_name == "Arrosoir en fer rempli":
+            return 2
+        elif item_name == "Arrosoir en or rempli":
+            return 3
+        else:
+            return None  # Pas d'utilisations limitées
+    
     def _setup_tooltip(self):
         """Configure le tooltip avec le nom de l'item et le stack"""
         self._update_tooltip_text()
         self.tooltip.background.color = color.hsv(0, 0, 0, .8)
     
     def _update_tooltip_text(self):
-        """Met à jour le texte du tooltip avec le nom et le stack"""
+        """Met à jour le texte du tooltip avec le nom, le stack et les utilisations"""
         name = self.item_name.replace('_', ' ').title()
         if self.stack > 1:
-            name += f"-{self.stack}"
+            name += f" x{self.stack}"
+        if self.uses is not None:
+            name += f" ({self.uses} utilisations)"
         self.tooltip = Tooltip(name)
         self.tooltip.background.color = color.hsv(0, 0, 0, .8)
     
