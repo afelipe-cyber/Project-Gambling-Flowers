@@ -475,14 +475,14 @@ def plant_selected_from_hotbar():
         print("Cliquez sur un cercle vert pour planter")
         return False
 
-    plant_pos = hit_info.point + ursina.Vec3(0, 0.5, 0)
+    plant_pos = ursina.Vec3(hit_info.entity.x, 0.5, hit_info.entity.z)
     plant = ursina.Entity(
         model='quad',
         texture=texture_paths.get(flower_name),
         color=ursina.color.white,
         position=plant_pos,
         scale=(1.5, 1.5, 1.5),
-        rotation_x=90,
+        rotation_z=90,
         collider='box',
         shader=ursina.shaders.lit_with_shadows_shader
     )
@@ -491,6 +491,9 @@ def plant_selected_from_hotbar():
     plant.age = 0.0
 
     planted_flowers.append(plant)
+
+    # Supprimer le carré vert après plantation
+    destroy(hit_info.entity)
 
     # Consomme la graine/fleur de l'inventaire.
     if getattr(selected_item, 'stack', 1) > 1:
