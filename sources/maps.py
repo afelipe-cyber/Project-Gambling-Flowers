@@ -57,23 +57,9 @@ def confirm_purchase():
         joueur.argent -= 50
         current_zone.color = ursina.color.rgb(139 / 255, 69 / 255, 19 / 255)  # Marron
         # current_zone.collider = None  # Garder le collider pour permettre l'arrosage
-        print("Zone achetée!")
-        # Ajouter 5 cercles de plantation
-        for i in range(5):
-            angle = i * 2 * math.pi / 5
-            radius = 5
-            spot_x = current_zone.x + radius * math.cos(angle)
-            spot_z = current_zone.z + radius * math.sin(angle)
-            spot = ursina.Entity(
-                model='cube',
-                scale=(1, 3, 1),
-                position=(spot_x, current_zone.y + 2, spot_z),
-                color=ursina.color.green,
-                collider='box',
-            )
-            if not hasattr(current_zone, 'planting_spots'):
-                current_zone.planting_spots = []
-            current_zone.planting_spots.append(spot)
+        print("Zone achetée! Arrosez la zone pour faire apparaître les emplacements de plantation.")
+        if not hasattr(current_zone, 'planting_spots'):
+            current_zone.planting_spots = []
     purchase_panel.visible = False
     # Réactiver les contrôles du joueur
     player.enable()
@@ -112,23 +98,9 @@ def create_map():
                 shader=ursina.shaders.lit_with_shadows_shader,
             )
             zones.append(zone)
-            # Si la zone est marron (achetée), ajouter les cercles de plantation
-            if zone_color == ursina.color.rgb(139 / 255, 69 / 255, 19 / 255):
-                for k in range(5):
-                    angle = k * 2 * math.pi / 5
-                    radius = 5
-                    spot_x = x + radius * math.cos(angle)
-                    spot_z = z + radius * math.sin(angle)
-                    spot = ursina.Entity(
-                        model='cube',
-                        scale=(1, 3, 1),
-                        position=(spot_x, -1.99 + 2, spot_z),
-                        color=ursina.color.green,
-                        collider='box',
-                    )
-                    if not hasattr(zone, 'planting_spots'):
-                        zone.planting_spots = []
-                    zone.planting_spots.append(spot)
+            # Les cercles de plantation apparaissent uniquement après arrosage
+            if not hasattr(zone, 'planting_spots'):
+                zone.planting_spots = []
             zone.on_click = lambda z=zone: on_zone_click(z)
 
 def fence():
@@ -177,9 +149,25 @@ def on_zone_click(zone):
         if selected_item and selected_item.item_name in ["Arrosoir rouillé rempli", "Arrosoir en fer rempli", "Arrosoir en or rempli"]:
             if selected_item.uses > 0:
                 selected_item.uses -= 1
-                zone.color = ursina.color.rgb(80 / 255, 40 / 255, 0 / 255)  # Marron foncé
-                print("Zone arrosée")
+                zone.color = ursina.color.rgb(80 / 255, 40 / 255, 0 / 255)  # Marron foncé (arrosé)
+                print("Zone arrosée ! Les emplacements de plantation sont maintenant disponibles.")
                 print(f"Utilisations restantes: {selected_item.uses}")
+                # Faire apparaître les 5 carrés verts de plantation
+                if not hasattr(zone, 'planting_spots'):
+                    zone.planting_spots = []
+                for k in range(5):
+                    angle = k * 2 * math.pi / 5
+                    radius = 5
+                    spot_x = zone.x + radius * math.cos(angle)
+                    spot_z = zone.z + radius * math.sin(angle)
+                    spot = ursina.Entity(
+                        model='cube',
+                        scale=(1, 3, 1),
+                        position=(spot_x, zone.y + 2, spot_z),
+                        color=ursina.color.green,
+                        collider='box',
+                    )
+                    zone.planting_spots.append(spot)
                 if selected_item.uses == 0:
                     # Changer en arrosoir vide
                     if "rouillé" in selected_item.item_name:

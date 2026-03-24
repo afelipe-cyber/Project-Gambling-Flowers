@@ -506,8 +506,23 @@ def plant_selected_from_hotbar():
     plant.flower_name = flower_name  # La fleur finale est mémorisée
     plant.growth_stage = 0
     plant.age = 0.0
+    plant._quads = [plant1, plant2]
 
     planted_flowers.append(plant)
+
+    # Délai de pousse selon la rareté : Commun=60s, Rare=100s, Epic=150s, Légendaire=300s
+    rarity = fleurs[flower_name].rareté
+    growth_delay = {1: 60, 2: 100, 3: 150, 4: 300}.get(rarity, 60)
+
+    # Après le délai, remplacer la texture de pousse par celle de la fleur
+    def bloom():
+        flower_texture = texture_paths.get(flower_name)
+        for quad in plant._quads:
+            quad.texture = flower_texture
+        plant.growth_stage = 1
+        print(f"'{flower_name}' a poussé !")
+
+    ursina.invoke(bloom, delay=growth_delay)
 
     # Supprimer le carré vert après plantation
     destroy(hit_info.entity)
