@@ -10,9 +10,65 @@ joueur = None
 player = None
 zones = []
 
+DRY_BROWN = ursina.color.rgb(139 / 255, 69 / 255, 19 / 255)
+WATERED_BROWN = ursina.color.rgb(80 / 255, 40 / 255, 0 / 255)
+
 # Purchase panel
 purchase_panel = None
 current_zone = None
+
+
+def _ensure_zone_state(zone):
+    if not hasattr(zone, 'planting_spots'):
+        zone.planting_spots = []
+    if not hasattr(zone, 'is_watered'):
+        zone.is_watered = False
+    if not hasattr(zone, 'grown_in_cycle'):
+        zone.grown_in_cycle = 0
+    if not hasattr(zone, 'dry_since'):
+        zone.dry_since = None
+
+
+def reset_zone_to_dry(zone, start_dry_timer=False):
+    """Remet la zone en marron sec et supprime les emplacements de plantation."""
+    _ensure_zone_state(zone)
+    zone.color = DRY_BROWN
+    zone.is_watered = False
+    zone.grown_in_cycle = 0
+    zone.dry_since = ursina.time.time() if start_dry_timer else None
+
+    for spot in list(zone.planting_spots):
+        try:
+            ursina.destroy(spot)
+        except Exception:
+            pass
+    zone.planting_spots.clear()
+
+
+def mark_zone_watered(zone):
+    """Passe la zone en état arrosé et démarre un nouveau cycle de pousse."""
+    _ensure_zone_state(zone)
+    zone.color = WATERED_BROWN
+    zone.is_watered = True
+    zone.grown_in_cycle = 0
+    zone.dry_since = None
+
+
+def create_planting_spots(zone):
+    _ensure_zone_state(zone)
+    for k in range(5):
+        angle = k * 2 * math.pi / 5
+        radius = 5
+        spot_x = zone.x + radius * math.cos(angle)
+        spot_z = zone.z + radius * math.sin(angle)
+        spot = ursina.Entity(
+            model='cube',
+            scale=(1, 3, 1),
+            position=(spot_x, zone.y + 2, spot_z),
+            color=ursina.color.green,
+            collider='box',
+        )
+        zone.planting_spots.append(spot)
 
 def init_purchase_panel():
     global purchase_panel
@@ -55,25 +111,9 @@ def confirm_purchase():
     global current_zone, joueur
     if current_zone and joueur and joueur.argent >= 50:
         joueur.argent -= 50
-        current_zone.color = ursina.color.rgb(139 / 255, 69 / 255, 19 / 255)  # Marron
+        reset_zone_to_dry(current_zone, start_dry_timer=False)
         # current_zone.collider = None  # Garder le collider pour permettre l'arrosage
-        print("Zone achetée!")
-        # Ajouter 5 cercles de plantation
-        for i in range(5):
-            angle = i * 2 * math.pi / 5
-            radius = 5
-            spot_x = current_zone.x + radius * math.cos(angle)
-            spot_z = current_zone.z + radius * math.sin(angle)
-            spot = ursina.Entity(
-                model='cube',
-                scale=(1, 3, 1),
-                position=(spot_x, current_zone.y + 2, spot_z),
-                color=ursina.color.green,
-                collider='box',
-            )
-            if not hasattr(current_zone, 'planting_spots'):
-                current_zone.planting_spots = []
-            current_zone.planting_spots.append(spot)
+        print("Zone achetée! Arrosez la zone pour faire apparaître les emplacements de plantation.")
     purchase_panel.visible = False
     # Réactiver les contrôles du joueur
     player.enable()
@@ -99,7 +139,7 @@ def create_map():
             z = 0 + (j - 2) * 15
             # Première zone (i=0, j=0) en marron, les autres en gris
             if i == 0 and j == 0:
-                zone_color = ursina.color.rgb(139 / 255, 69 / 255, 19 / 255)  # Marron
+                zone_color = DRY_BROWN  # Marron
             else:
                 zone_color = ursina.color.gray  # Gris
             zone = ursina.Entity(
@@ -112,23 +152,7 @@ def create_map():
                 shader=ursina.shaders.lit_with_shadows_shader,
             )
             zones.append(zone)
-            # Si la zone est marron (achetée), ajouter les cercles de plantation
-            if zone_color == ursina.color.rgb(139 / 255, 69 / 255, 19 / 255):
-                for k in range(5):
-                    angle = k * 2 * math.pi / 5
-                    radius = 5
-                    spot_x = x + radius * math.cos(angle)
-                    spot_z = z + radius * math.sin(angle)
-                    spot = ursina.Entity(
-                        model='cube',
-                        scale=(1, 3, 1),
-                        position=(spot_x, -1.99 + 2, spot_z),
-                        color=ursina.color.green,
-                        collider='box',
-                    )
-                    if not hasattr(zone, 'planting_spots'):
-                        zone.planting_spots = []
-                    zone.planting_spots.append(spot)
+            _ensure_zone_state(zone)
             zone.on_click = lambda z=zone: on_zone_click(z)
 
 def fence():
@@ -172,14 +196,16 @@ def on_zone_click(zone):
         player.disable()
         fpc.mouse.locked = False
         player.cursor.visible = False
-    elif zone.color == ursina.color.rgb(139 / 255, 69 / 255, 19 / 255):  # Marron
+    elif zone.color == DRY_BROWN:  # Marron
         selected_item = get_selected_hotbar_item()
         if selected_item and selected_item.item_name in ["Arrosoir rouillé rempli", "Arrosoir en fer rempli", "Arrosoir en or rempli"]:
             if selected_item.uses > 0:
                 selected_item.uses -= 1
-                zone.color = ursina.color.rgb(80 / 255, 40 / 255, 0 / 255)  # Marron foncé
-                print("Zone arrosée")
+                mark_zone_watered(zone)
+                print("Zone arrosée ! Les emplacements de plantation sont maintenant disponibles.")
                 print(f"Utilisations restantes: {selected_item.uses}")
+                # Faire apparaître les 5 carrés verts de plantation
+                create_planting_spots(zone)
                 if selected_item.uses == 0:
                     # Changer en arrosoir vide
                     if "rouillé" in selected_item.item_name:

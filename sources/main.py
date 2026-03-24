@@ -4,7 +4,6 @@ import ursina
 from ursina.shaders import lit_with_shadows_shader
 import ursina.prefabs.first_person_controller as fpc
 from Inventaire import *
-import Objets
 import maps
 import random
 import Joueur
@@ -41,6 +40,8 @@ argent_text = joueur.affichage_argent()
 
 def update():
     joueur.affichage_argent()
+    update_zone_dry_timers()
+    update_plant_growth()
 
 
 # Créer le terrain
@@ -153,6 +154,10 @@ tirage_en_cours = False
 def make_1_wishes():
     """Fait 1 tirage aléatoire et ajoute une graine à l'inventaire"""
     global tirage_en_cours
+
+    if mushroom_panel.visible:
+        print("Fermez l'interface Champignon pour faire un tirage.")
+        return
     
     # Vérifier si un tirage est déjà en cours
     if tirage_en_cours:
@@ -241,6 +246,10 @@ def show_seed_result(seed_name, rarity):
 
 def toggle_atm_interface():
     """Affiche/cache l'interface ATM"""
+    if not atm_panel.visible and mushroom_panel.visible:
+        print("Fermez l'interface Champignon avant d'ouvrir l'ATM.")
+        return
+
     atm_panel.visible = not atm_panel.visible
     if atm_panel.visible:
         # Fermer l'inventaire si ouvert
@@ -265,6 +274,10 @@ def toggle_atm_interface():
 
 
 def sell_selected_flower():
+    if atm_panel.visible:
+        print("Fermez l'interface ATM pour vendre au Champignon.")
+        return
+
     selected_item = get_selected_hotbar_item()
     if not selected_item or not getattr(selected_item, 'item_name', None):
         mushroom_panel.visible = False
@@ -324,6 +337,10 @@ def sell_selected_flower():
 
 def toggle_mushroom_interface():
     """Affiche/cache l'interface Champignon"""
+    if not mushroom_panel.visible and atm_panel.visible:
+        print("Fermez l'interface ATM avant d'ouvrir le Champignon.")
+        return
+
     mushroom_panel.visible = not mushroom_panel.visible
     if mushroom_panel.visible:
         # Fermer l'inventaire si ouvert
@@ -436,6 +453,105 @@ Inventory.player = player
 
 # Planter des fleurs sur le terrain en fonction de la hotbar du joueur
 planted_flowers = []
+ZONE_REWATER_TIMEOUT = 60
+
+
+def destroy_plants_in_zone(zone):
+    """Détruit toutes les pousses/fleurs liées à une zone et vide leur liste active."""
+    destroyed_count = 0
+    for plant in list(planted_flowers):
+        if getattr(plant, '_zone', None) is zone:
+            if plant in planted_flowers:
+                planted_flowers.remove(plant)
+            try:
+                destroy(plant)
+            except Exception:
+                pass
+            destroyed_count += 1
+    return destroyed_count
+
+
+def update_zone_dry_timers():
+    """Si une zone sèche trop longtemps, détruit les plantes restantes de cette zone."""
+    now = ursina.time.time()
+    for zone in getattr(maps, 'zones', []):
+        dry_since = getattr(zone, 'dry_since', None)
+        if dry_since is None:
+            continue
+        if now - dry_since >= ZONE_REWATER_TIMEOUT:
+            removed = destroy_plants_in_zone(zone)
+            if removed > 0:
+                print("Zone non arrosée depuis 2 minutes: pousses/fleurs détruites.")
+            zone.dry_since = None
+
+
+def bloom_plant(plant):
+    """Fait passer une pousse en fleur mûre."""
+    if plant not in planted_flowers:
+        return
+    if getattr(plant, 'growth_stage', 0) != 0:
+        return
+
+    zone = getattr(plant, '_zone', None)
+    if zone is not None and not getattr(zone, 'is_watered', False):
+        return
+
+    flower_texture = texture_paths.get(plant.flower_name)
+    for quad in plant._quads:
+        quad.texture = flower_texture
+    plant.growth_stage = 1
+    print(f"'{plant.flower_name}' a poussé ! Cliquez dessus pour récolter.")
+
+    # Après 3 fleurs poussées, la zone arrosée repasse en marron (sec).
+    if zone is not None and getattr(zone, 'is_watered', False):
+        zone.grown_in_cycle = getattr(zone, 'grown_in_cycle', 0) + 1
+        if zone.grown_in_cycle >= 3:
+            maps.reset_zone_to_dry(zone, start_dry_timer=True)
+            print("La zone est redevenue marron. Ré-arrosez-la sous 2 minutes pour éviter la destruction des pousses/fleurs.")
+
+    def harvest():
+        if plant not in planted_flowers:
+            return
+
+        # Ajouter la fleur à l'inventaire
+        inventory.add_item(plant.flower_name)
+        matrice_inventaire()
+        print(f"'{plant.flower_name}' récoltée et ajoutée à l'inventaire !")
+
+        # Recréer le carré vert de plantation uniquement si la zone est arrosée.
+        plant_zone = getattr(plant, '_zone', None)
+        if plant_zone is not None and getattr(plant_zone, 'is_watered', False):
+            new_spot = ursina.Entity(
+                model='cube',
+                scale=(1, 3, 1),
+                position=plant._spot_pos,
+                color=ursina.color.green,
+                collider='box',
+            )
+            plant_zone.planting_spots.append(new_spot)
+
+        if plant in planted_flowers:
+            planted_flowers.remove(plant)
+        destroy(plant)
+
+    plant.on_click = harvest
+
+
+def update_plant_growth():
+    """La croissance avance uniquement quand la zone de la plante est arrosée."""
+    dt = ursina.time.dt
+    for plant in list(planted_flowers):
+        if getattr(plant, 'growth_stage', 0) != 0:
+            continue
+
+        zone = getattr(plant, '_zone', None)
+        if zone is not None and not getattr(zone, 'is_watered', False):
+            # Zone non arrosée: croissance en pause.
+            continue
+
+        plant.age += dt
+        if plant.age >= getattr(plant, 'growth_delay', 60):
+            bloom_plant(plant)
 
 def build_flower_name_from_item(item_name):
     if not item_name:
@@ -476,16 +592,27 @@ def plant_selected_from_hotbar():
         return False
 
     plant_pos = ursina.Vec3(hit_info.entity.x, 1.8, hit_info.entity.z)
+    spot_pos = ursina.Vec3(hit_info.entity.x, hit_info.entity.y, hit_info.entity.z)
+
+    # Trouver la zone propriétaire du carré vert et le retirer de sa liste
+    spot_zone = None
+    for z in maps.zones:
+        if hit_info.entity in getattr(z, 'planting_spots', []):
+            spot_zone = z
+            z.planting_spots.remove(hit_info.entity)
+            break
+
     # Créer une entité parent pour la fleur
     plant = ursina.Entity(
         position=plant_pos,
         collider='box'
     )
-    # Créer deux quads pour former une croix comme dans Minecraft
+    # Afficher la Pousse à la plantation (la fleur poussera plus tard)
+    sprout_texture = texture_paths.get("Pousse")
     plant1 = ursina.Entity(
         parent=plant,
         model='quad',
-        texture=texture_paths.get(flower_name),
+        texture=sprout_texture,
         color=ursina.color.white,
         scale=(4, 4, 4),
         rotation_y=45,
@@ -495,18 +622,26 @@ def plant_selected_from_hotbar():
     plant2 = ursina.Entity(
         parent=plant,
         model='quad',
-        texture=texture_paths.get(flower_name),
+        texture=sprout_texture,
         color=ursina.color.white,
         scale=(4, 4, 4),
         rotation_y=135,
         double_sided=True,
         shader=ursina.shaders.lit_with_shadows_shader
     )
-    plant.flower_name = flower_name
+    plant.flower_name = flower_name  # La fleur finale est mémorisée
     plant.growth_stage = 0
     plant.age = 0.0
+    plant._quads = [plant1, plant2]
+    plant._spot_pos = spot_pos
+    plant._zone = spot_zone
 
     planted_flowers.append(plant)
+
+    # Délai de pousse selon la rareté : Commun=60s, Rare=100s, Epic=150s, Légendaire=300s
+    rarity = fleurs[flower_name].rareté
+    growth_delay = {1: 60, 2: 100, 3: 150, 4: 300}.get(rarity, 60)
+    plant.growth_delay = growth_delay
 
     # Supprimer le carré vert après plantation
     destroy(hit_info.entity)
@@ -529,12 +664,20 @@ def plant_selected_from_hotbar():
     return True
 
 def input(key):
+    # Bloquer l'ouverture/fermeture de l'inventaire pendant les interfaces ATM/Champignon.
+    if key == 'e' and (atm_panel.visible or mushroom_panel.visible):
+        return
+
     try:
         inv_input(key, player, fpc.mouse)
     except Exception as e:
         print("inv_input error:", e)
 
     if key == 'right mouse down':
+        # Empêcher de basculer vers l'autre interface tant qu'une interface est ouverte.
+        if atm_panel.visible or mushroom_panel.visible:
+            return
+
         if hint_text.enabled:
             if stand.hovered:
                 toggle_atm_interface()
