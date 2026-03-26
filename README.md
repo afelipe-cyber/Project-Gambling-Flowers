@@ -48,9 +48,27 @@ python3 sources/main.py
 ```
 
 <a id="structure"></a>
-## Fabriqué avec
+## Structure du projet
 
-...
+```
+├── sources/
+│   ├── main.py               # Point d'entrée du jeu
+│   ├── Joueur.py             # Initialisation du joueur
+│   ├── maps.py               # Création de la maps
+│   ├── Inventaire.py         # Créaton et initialisation de l'inventaire
+│   ├── modele3d.py           # Initialisation des modèles et de leur fonctionnement
+│   └── fleurs.py             # Module qui gère tout ce qui est en rapport avec les fleurs
+│
+├── data/                     # Ressources (images, sons, modèles 3D, )
+│    ├── Arrosoirs/           # Images des arrosoirs
+│    ├── atm/                 # Modèles 3D de l'atm et du PNJ
+│    ├── Fleurs/              # Images des fleurs
+│    ├── Graines/             # Images des graines
+│    ├── casa/                # Modèle 3D d'une maison non implémenté
+│    └── Divers/              # L'emplacement des sons + image de la pousse
+└── requirements.txt
+```
+
 
 <a id="auteurs"></a>
 ## Auteurs
