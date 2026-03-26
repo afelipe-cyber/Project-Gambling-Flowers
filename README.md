@@ -1,16 +1,16 @@
 # GAMBLING FLOWERS
 
-Quand le joueur commence le jeu, il commence avec un peu d'argent, avec cette argent il pourra faire des tirages sur une bannière de graine et/ou acheter des arrosoirs pour arroser les plantes, quand on a une graine, on pourra la planter dans un petit jardin.
+Gambling Flowers est un jeu de gestion et de simulation dans lequel vous incarnez un joueur, votre objectif est de planter des graines pour obtenir des fleurs pour ensuite les vendre. En vendant les fleurs, vous obtiendrez de l'argent, qui pourra être utilisé dans notre système de Gacha pour obtenir d'autres graines.
 
-Quand la plante a fini de grandir, on pourra récolter cette plante, puis vendre cette plante pour gagner de l'argent pour essayer d'obtenier d'autres plantes plus rare.
+## Sommaire
 
-On peut utiliser les plantes pour invoquer des boss, les vaincre et terminer le jeu.
+├─ [Fonctionnalités](#fonctionnalites)  
+├─ [Installation & Démarrage](#installation)  
+├─ [Structure du projet](#structure)  
+└─ [Auteurs](#auteurs)  
 
-## Pour commencer
-
-Entrez ici les instructions pour bien débuter avec votre projet...
-
-### Pré-requis
+<a id="fonctionnalites"></a>
+### Fonctionnalités
 
 Ce qu'il est requis pour commencer avec votre projet...
 
@@ -18,24 +18,19 @@ Ce qu'il est requis pour commencer avec votre projet...
 - Programme 2
 - etc...
 
-### Installation
+<a id="installation"></a>
+### Installation et Démarrage
 
 Les étapes pour installer votre programme....
 
 Dites ce qu'il faut faire...
 
-## Démarrage
-
-Dites comment faire pour lancer votre projet
-
+<a id="structure"></a>
 ## Fabriqué avec
 
 Entrez les programmes/logiciels/ressources que vous avez utilisé pour développer votre projet
 
-## Versions
-
-Listez les versions.
-
+<a id="auteurs"></a>
 ## Auteurs
 
 Listez les auteurs et les autrices du projet.
