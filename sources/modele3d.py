@@ -316,7 +316,7 @@ class SceneGameUI:
 			self.tirage_en_cours = False
 			print("Vous pouvez maintenant faire un nouveau tirage.")
 
-		ursina.invoke(reset_tirage, delay=5)
+		ursina.invoke(reset_tirage, delay=2)
 
 	def show_seed_result(self, seed_name, rarity):
 		rarity_text = ""
