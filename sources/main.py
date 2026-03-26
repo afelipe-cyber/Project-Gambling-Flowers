@@ -19,7 +19,7 @@ ursina.application.asset_folder = Path(__file__).resolve().parent.parent
 app = ursina.Ursina()
 pg.init()  # Initialiser Pygame pour la musique
 pg.mixer.music.load("data/Divers/Moonlight_Sonata.mp3")
-pg.mixer.music.set_volume(0.2)
+pg.mixer.music.set_volume(0.1)
 pg.mixer.music.play(-1)  # Jouer en boucle
 
 try:
