@@ -1,7 +1,5 @@
 from ursina import *
 from Objets import *
-import ursina.prefabs.first_person_controller as fpc
-import random
 
 
 hotspots = []
