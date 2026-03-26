@@ -363,6 +363,13 @@ class SceneGameUI:
 		self.mushroom_button.enabled = is_enabled
 		self.close_mushroom_button.enabled = is_enabled
 
+	def _close_mushroom_interface(self):
+		self.mushroom_panel.visible = False
+		self._set_mushroom_widgets_enabled(False)
+		self.player.enable()
+		self.fpc_mouse.locked = True
+		self.player.cursor.visible = True
+
 	def _apply_atm_button_styles(self):
 		self.atm_button.color = ursina.color.green
 		self.atm_button.highlight_color = ursina.color.lime
@@ -411,32 +418,23 @@ class SceneGameUI:
 
 		selected_item = self.get_selected_hotbar_item()
 		if not selected_item or not getattr(selected_item, "item_name", None):
-			self.mushroom_panel.visible = False
 			print("Ce n'est pas une fleur")
-			self.player.enable()
-			self.fpc_mouse.locked = True
-			self.player.cursor.visible = True
+			self._close_mushroom_interface()
 			return
 
 		item_name = selected_item.item_name
 		rarete = None
 
 		if item_name in self.graines or item_name.lower().startswith("graines"):
-			self.mushroom_panel.visible = False
 			print("Ce n'est pas une fleur")
-			self.player.enable()
-			self.fpc_mouse.locked = True
-			self.player.cursor.visible = True
+			self._close_mushroom_interface()
 			return
 
 		if item_name in self.fleurs:
 			rarete = self.fleurs[item_name].rareté
 		else:
-			self.mushroom_panel.visible = False
 			print("Ce n'est pas une Fleur")
-			self.player.enable()
-			self.fpc_mouse.locked = True
-			self.player.cursor.visible = True
+			self._close_mushroom_interface()
 			return
 
 		gain = {1: 13, 2: 20, 3: 35, 4: 50}.get(rarete, 1)
@@ -463,11 +461,7 @@ class SceneGameUI:
 
 		self.matrice_inventaire()
 
-		self.mushroom_panel.visible = False
-		self._set_mushroom_widgets_enabled(False)
-		self.player.enable()
-		self.fpc_mouse.locked = True
-		self.player.cursor.visible = True
+		self._close_mushroom_interface()
 
 	def toggle_mushroom_interface(self):
 		"""Affiche/cache l'interface Champignon."""
@@ -504,6 +498,7 @@ class SceneGameUI:
 			parent=self.atm_panel,
 			text="Distributeur Automatique",
 			position=(0, 0.17),
+			z=-0.2,
 			scale=1.5,
 			color=ursina.color.white,
 		)
@@ -512,6 +507,7 @@ class SceneGameUI:
 			parent=self.atm_panel,
 			text="Faire 1 tirage",
 			position=(0, -0.02),
+			z=-0.3,
 			scale=(0.42, 0.11),
 			on_click=self.make_1_wishes,
 		)
@@ -520,6 +516,7 @@ class SceneGameUI:
 			parent=self.atm_panel,
 			text="Fermer",
 			position=(0, -0.18),
+			z=-0.3,
 			scale=(0.2, 0.08),
 			on_click=self.toggle_atm_interface,
 		)
@@ -539,6 +536,7 @@ class SceneGameUI:
 			parent=self.mushroom_panel,
 			text="Champignon Magique",
 			position=(0, 0.17),
+			z=-0.2,
 			scale=1.5,
 			color=ursina.color.white,
 		)
@@ -547,6 +545,7 @@ class SceneGameUI:
 			parent=self.mushroom_panel,
 			text="Vendre la fleur tenue",
 			position=(0, -0.01),
+			z=-0.3,
 			scale=(0.52, 0.12),
 			on_click=self.sell_selected_flower,
 		)
@@ -555,6 +554,7 @@ class SceneGameUI:
 			parent=self.mushroom_panel,
 			text="Fermer",
 			position=(0, -0.18),
+			z=-0.3,
 			scale=(0.2, 0.08),
 			on_click=self.toggle_mushroom_interface,
 		)
