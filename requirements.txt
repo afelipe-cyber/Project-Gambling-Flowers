@@ -3,3 +3,6 @@ ursina
 Pillow
 pygame
 numpy
+random
+math
+importlib.util
