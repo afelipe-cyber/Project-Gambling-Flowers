@@ -1,45 +1,65 @@
 # Présentation du modèle
 
-La présentation du projet est une description synthétique rédigée par les élèves. Vous trouverez ci-dessous les informations à détailler dans ce fichier :
-
 ## Présentation globale
 
-*Vous présentez le contexte de réalisation de votre projet => compétences évaluées : pertinence et son degré d'utilité de votre projet, originalité des idées.*
+  Gambling Flowers est un jeu de gestion et collection développé en python avec
+comme bibliothèque principale Ursina Engine, une bibliothèque qui permet de coder en
+3D. Dans ce jeu, on peut obtenir des graines par un système de gacha, qui est une
+mécanique de jeu inspirée des distributeurs automatiques japonais (gachapon), où les
+joueurs dépensent une monnaie virtuelle ou réelle pour obtenir aléatoirement des objets,
+ici des graines. On peut planter ces graines et attendre qu’elles grandissent et qu’elles
+deviennent des fleurs, ces fleurs peuvent se vendre plus ou moins cher en fonction de
+leur rareté pour ensuite acheter de nouvelles graines
 
-Précisez les informations suivantes :
-- naissance de l’idée,
-- problématique initiale, 
-- objectifs de la solution proposée.
+  Ce projet est né au début d’une simple blague, car quand nous avons pris
+connaissance du thème cette année, nous avons pensé à un jeu sur Roblox qui s’appelle
+« Grow a Garden », donc on a essayé de le répliquer en python mais sans plagier le jeu :
+on s’en est inspiré pour faire notre projet. Notre problématique de départ, était de faire
+un projet un minimum original, et en rapport avec le thème de cette année. On voulait
+créer un projet qui fusionne nature et informatique, en s'inspirant d'un concept existant
+sans le plagier. Sur le plan technique, il s'agit de maîtriser Ursina Engine pour créer une
+expérience immersive en 3D avec Python.
+
+
 
 ## Présentation de l'équipe
 
-*Vous présentez l'organisation définie dans le groupe. Chaque membre de l’équipe doit impérativement réaliser un aspect technique du projet (hors design, gestion de projet, rédaction de la documentation) => compétences évaluées : capacité à travailler en équipe, bon équilibre des différentes tâches.*
+Notre équipe est composé de trois élèves de Terminale du Lycée Montaigne;
 
-Précisez les informations suivantes :
-- présentation de l’équipe, 
-- rôle de chacun et chacune, 
-- répartition des tâches, 
-- temps passé sur le projet.
+HUANG Samuel;
+- Structure principale du projet
+- Système de tirage
+- Interaction PNJ
+- L'arrosage
+FELIPE Antoine;
+- Recherche des textures
+- Système de plantage
+- Système de récolte
+DO DUY Raphaël;
+- Procuration des modèles 3D
+- Création de la plateforme
+-Implémentaion des shaders
 
-## Étapes du projet
+### Utilisation de l'IA
 
-Vous présentez les principales étapes de votre projet, de la naissance de l'idée jusqu’au développement de votre solution.
+L'inteligence artificielle a été utilisée pour du conseil et nous guider dans la rédaction de tests unitaires, mais aussi pour nous guider sur certaines questions techniques, comme l'implémentaion des shaders. Nous avions aussi utilisé l'IA pour organiser le code, car à un moment tout notre code était dans un seul fichier, l'IA nous a permis de séparer le code et de rendre le code plus lisible.
+
+
 
 ## Validation de l’opérationnalité et du fonctionnement 
 
-*Vous détaillez l'état d'avancement de votre projet et les actions menées pour garantir le bon fonctionnement de votre solution => compétences évaluées : capacité à innover, à identifier les difficultés et à proposer des améliorations, capacité à justifier des choix technologiques et à expliquer les concepts.*
-
-Précisez les informations suivantes :
-- état d’avancement du projet au moment du dépôt,
-- approches mises en œuvre pour vérifier l’absence de bugs,
-- difficultés rencontrées et les solutions apportées.
+...
 
 ## Ouverture 
 
-*Vous réalisez un bilan personnel sur ce projet et détaillez l'expérience vécue par chaque membre de l'équipe => compétences évaluées : analyse critique, prise de recul, implication dans le projet.*
+Nous avons de nombreuses idées d'améliorations possibles;
+- ajout de boss invoqués en utilisant les fleurs
+- ajout d'un système de combat
+- ajout de succès
+- amélioration de l'interface utilisateur
+- ajout d'un système de sauvegarde
 
-Précisez les informations suivantes :
-- idées d'amélioration du projet,
-- analyse critique, 
-- compétences personnelles développées.
-- démarche d'inclusion.
+Grâce à ce projet, on a réussi à être beaucoup plus autonomes, à améliorer
+notre niveau en programmation, à entrainer notre patience face à un code qui ne marche
+pas ou qui ne fait pas ce que l’on veut, et on a surtout développé un très bon esprit
+d’équipe qui a soudé nos relations amicales.
