@@ -71,5 +71,7 @@ Ce projet est sous licence **General Public License v3.0** - voir le fichier [LI
 #### Musique de fond, et son
 
 *Moonlight Sonata*, Beethoven
+
 [*Cash Register Cha-Ching*, cashregistersound](https://cashregistersound.bandcamp.com/album/cash-register-cha-ching-sound-effects-30-hd-sounds-download-any-sound-or-the-complete-sample-pack)
+
 [Cash Register "Kaching" (Money Sound), Sound Library](https://www.youtube.com/watch?v=FFt6VGujJnY)
