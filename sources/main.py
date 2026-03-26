@@ -14,7 +14,7 @@ import fleurs as fleurs_logic
 from Objets import texture_paths
 
 
-# Make assets resolvable from project root (not /sources).
+# Rendre les assets accessibles depuis la racine du projet (et non depuis /sources).
 ursina.application.asset_folder = Path(__file__).resolve().parent.parent
 app = ursina.Ursina()
 pg.init()  # Initialiser Pygame pour la musique

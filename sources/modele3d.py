@@ -497,10 +497,11 @@ class SceneGameUI:
 		self.atm_title = ursina.Text(
 			parent=self.atm_panel,
 			text="Distributeur Automatique",
-			position=(0, 0.17),
+			position=(0.22, 0.17),
 			z=-0.2,
 			scale=1.5,
 			color=ursina.color.white,
+			origin=(0.5, 0.5),
 		)
 
 		self.atm_button = ursina.Button(
@@ -535,10 +536,11 @@ class SceneGameUI:
 		self.mushroom_title = ursina.Text(
 			parent=self.mushroom_panel,
 			text="Champignon Magique",
-			position=(0, 0.17),
+			position=(0.22, 0.17),
 			z=-0.2,
 			scale=1.5,
 			color=ursina.color.white,
+			origin=(0.5, 0.5),
 		)
 
 		self.mushroom_button = ursina.Button(
