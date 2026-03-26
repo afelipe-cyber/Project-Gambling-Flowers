@@ -48,7 +48,13 @@ L'inteligence artificielle a été utilisée pour du conseil et nous guider dans
 
 ## Validation de l’opérationnalité et du fonctionnement 
 
-...
+Nous avions implémenté des tests dans chaques fichiers, et nous avions testé chaque fonctionalité pour réduit au maximum le numbre de bug.
+
+Nous avons rencontré différents problèmes, comme:
+- Problèmes de performances car Ursina Engine n'est pas très optimisé pour les modèles 3D,
+- Problèmes liés aux hitbox des modèles 3D, il arrive qu'on reste coincé dedans,
+- 
+   
 
 ## Ouverture 
 
