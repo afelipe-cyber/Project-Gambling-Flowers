@@ -118,7 +118,7 @@ def init_purchase_panel():
     purchase_title = ursina.Text(
         parent=purchase_panel,
         text="Acheter zone 50 pièces",
-        position=(0, 0),
+        position=(0, 0.08),
         scale=1.2,
         color=ursina.color.red,
         z=-0.4,
@@ -140,6 +140,10 @@ def init_purchase_panel():
         scale=(0.2, 0.1),
         on_click=cancel_purchase,
     )
+
+    # Center title between the two buttons and keep a stable vertical offset above them.
+    purchase_title.x = (yes_button.x + no_button.x) / 2 - 0.15
+    purchase_title.y = yes_button.y + 0.18
 
 def confirm_purchase():
     global current_zone, joueur

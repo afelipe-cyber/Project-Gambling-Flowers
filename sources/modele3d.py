@@ -239,6 +239,9 @@ class SceneGameUI:
 
 	def make_1_wishes(self):
 		"""Fait 1 tirage aleatoire et ajoute une graine a l'inventaire."""
+		if not self.atm_panel.visible:
+			return
+
 		if self.mushroom_panel.visible:
 			print("Fermez l'interface Champignon pour faire un tirage.")
 			return
@@ -350,6 +353,36 @@ class SceneGameUI:
 
 		ursina.invoke(hide_result, delay=3)
 
+	def _set_atm_widgets_enabled(self, is_enabled):
+		self.atm_title.enabled = is_enabled
+		self.atm_button.enabled = is_enabled
+		self.close_button.enabled = is_enabled
+
+	def _set_mushroom_widgets_enabled(self, is_enabled):
+		self.mushroom_title.enabled = is_enabled
+		self.mushroom_button.enabled = is_enabled
+		self.close_mushroom_button.enabled = is_enabled
+
+	def _apply_atm_button_styles(self):
+		self.atm_button.color = ursina.color.green
+		self.atm_button.highlight_color = ursina.color.lime
+		self.atm_button.pressed_color = ursina.color.rgb(0, 100, 0)
+		self.atm_button.text_color = ursina.color.white
+		self.close_button.color = ursina.color.red
+		self.close_button.highlight_color = ursina.color.pink
+		self.close_button.pressed_color = ursina.color.rgb(100, 0, 0)
+		self.close_button.text_color = ursina.color.white
+
+	def _apply_mushroom_button_styles(self):
+		self.mushroom_button.color = ursina.color.blue
+		self.mushroom_button.highlight_color = ursina.color.cyan
+		self.mushroom_button.pressed_color = ursina.color.rgb(0, 0, 100)
+		self.mushroom_button.text_color = ursina.color.white
+		self.close_mushroom_button.color = ursina.color.red
+		self.close_mushroom_button.highlight_color = ursina.color.pink
+		self.close_mushroom_button.pressed_color = ursina.color.rgb(100, 0, 0)
+		self.close_mushroom_button.text_color = ursina.color.white
+
 	def toggle_atm_interface(self):
 		"""Affiche/cache l'interface ATM."""
 		if not self.atm_panel.visible and self.mushroom_panel.visible:
@@ -357,18 +390,15 @@ class SceneGameUI:
 			return
 
 		self.atm_panel.visible = not self.atm_panel.visible
+		self._set_atm_widgets_enabled(self.atm_panel.visible)
 		if self.atm_panel.visible:
 			if self.iPan and self.iPan.visible:
 				self.Inventory.toggle()
-			self.atm_button.color = ursina.color.green
-			self.atm_button.highlight_color = ursina.color.lime
-			self.atm_button.pressed_color = ursina.color.rgb(0, 100, 0)
-			self.close_button.color = ursina.color.red
-			self.close_button.highlight_color = ursina.color.pink
-			self.close_button.pressed_color = ursina.color.rgb(100, 0, 0)
+			self._apply_atm_button_styles()
+			ursina.invoke(self._apply_atm_button_styles, delay=0)
 			self.player.disable()
 			self.fpc_mouse.locked = False
-			self.player.cursor.visible = False
+			self.player.cursor.visible = True
 		else:
 			self.player.enable()
 			self.fpc_mouse.locked = True
@@ -434,6 +464,7 @@ class SceneGameUI:
 		self.matrice_inventaire()
 
 		self.mushroom_panel.visible = False
+		self._set_mushroom_widgets_enabled(False)
 		self.player.enable()
 		self.fpc_mouse.locked = True
 		self.player.cursor.visible = True
@@ -445,18 +476,15 @@ class SceneGameUI:
 			return
 
 		self.mushroom_panel.visible = not self.mushroom_panel.visible
+		self._set_mushroom_widgets_enabled(self.mushroom_panel.visible)
 		if self.mushroom_panel.visible:
 			if self.iPan and self.iPan.visible:
 				self.Inventory.toggle()
-			self.mushroom_button.color = ursina.color.blue
-			self.mushroom_button.highlight_color = ursina.color.cyan
-			self.mushroom_button.pressed_color = ursina.color.rgb(0, 0, 100)
-			self.close_mushroom_button.color = ursina.color.red
-			self.close_mushroom_button.highlight_color = ursina.color.pink
-			self.close_mushroom_button.pressed_color = ursina.color.rgb(100, 0, 0)
+			self._apply_mushroom_button_styles()
+			ursina.invoke(self._apply_mushroom_button_styles, delay=0)
 			self.player.disable()
 			self.fpc_mouse.locked = False
-			self.player.cursor.visible = False
+			self.player.cursor.visible = True
 		else:
 			self.player.enable()
 			self.fpc_mouse.locked = True
@@ -466,7 +494,7 @@ class SceneGameUI:
 		self.atm_panel = ursina.Panel(
 			parent=ursina.camera.ui,
 			model="quad",
-			scale=(0.6, 0.4),
+			scale=(0.68, 0.46),
 			position=(0, 0),
 			color=ursina.color.dark_gray,
 			visible=False,
@@ -475,7 +503,7 @@ class SceneGameUI:
 		self.atm_title = ursina.Text(
 			parent=self.atm_panel,
 			text="Distributeur Automatique",
-			position=(0, 0.15),
+			position=(0, 0.17),
 			scale=1.5,
 			color=ursina.color.white,
 		)
@@ -483,31 +511,25 @@ class SceneGameUI:
 		self.atm_button = ursina.Button(
 			parent=self.atm_panel,
 			text="Faire 1 tirage",
-			position=(0, -0.1),
-			scale=(0.4, 0.1),
+			position=(0, -0.02),
+			scale=(0.42, 0.11),
 			on_click=self.make_1_wishes,
 		)
-
-		self.atm_button.color = ursina.color.green
-		self.atm_button.highlight_color = ursina.color.lime
-		self.atm_button.pressed_color = ursina.color.rgb(0, 100, 0)
 
 		self.close_button = ursina.Button(
 			parent=self.atm_panel,
 			text="Fermer",
-			position=(0, -0.25),
+			position=(0, -0.18),
 			scale=(0.2, 0.08),
 			on_click=self.toggle_atm_interface,
 		)
-
-		self.close_button.color = ursina.color.red
-		self.close_button.highlight_color = ursina.color.pink
-		self.close_button.pressed_color = ursina.color.rgb(100, 0, 0)
+		self._apply_atm_button_styles()
+		self._set_atm_widgets_enabled(False)
 
 		self.mushroom_panel = ursina.Panel(
 			parent=ursina.camera.ui,
 			model="quad",
-			scale=(0.6, 0.4),
+			scale=(0.68, 0.46),
 			position=(0, 0),
 			color=ursina.color.dark_gray,
 			visible=False,
@@ -516,16 +538,16 @@ class SceneGameUI:
 		self.mushroom_title = ursina.Text(
 			parent=self.mushroom_panel,
 			text="Champignon Magique",
-			position=(0, 0.15),
+			position=(0, 0.17),
 			scale=1.5,
 			color=ursina.color.white,
 		)
 
 		self.mushroom_button = ursina.Button(
 			parent=self.mushroom_panel,
-			text="Vendre La Fleurs dans la Main",
-			position=(0, 0.2),
-			scale=(0.6, 0.15),
+			text="Vendre la fleur tenue",
+			position=(0, -0.01),
+			scale=(0.52, 0.12),
 			on_click=self.sell_selected_flower,
 		)
 
@@ -536,6 +558,8 @@ class SceneGameUI:
 			scale=(0.2, 0.08),
 			on_click=self.toggle_mushroom_interface,
 		)
+		self._apply_mushroom_button_styles()
+		self._set_mushroom_widgets_enabled(False)
 
 
 def init_scene_models(player):
