@@ -1,8 +1,7 @@
 # Requires Python 3.12 or above
 ursina
-Pillow
 pygame
-numpy
 random
 math
 importlib.util
+pathlib
