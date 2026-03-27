@@ -1,4 +1,5 @@
 # Requires Python 3.12 or above
+# Requires Windows 10 or above, does not work on Linux
 ursina
 pygame
 random
