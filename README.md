@@ -37,8 +37,8 @@ Si vous installez le projet via git :
 
 ```bash
 git clone https://github.com/afelipe-cyber/Project-Gambling-Flowers.git
-cd Gambling-Flowers
-pip install -r "requirements.txt"
+cd Project-Gambling-Flowers
+python -m pip install -r "requirements.txt"
 ```
 
 ### Démarrer le jeu
