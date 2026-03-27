@@ -1,8 +1,4 @@
 # Requires Python 3.12 or above
 # Requires Windows 10 or above, does not work on Linux
-ursina
-pygame
-random
-math
-importlib.util
-pathlib
+ursina>=8.3.0
+pygame>=2.6.1
