@@ -115,6 +115,116 @@ class FlowerSystem:
 			if plant.age >= getattr(plant, "growth_delay", 60):
 				self.bloom_plant(plant)
 
+	def serialize_planted_flowers(self):
+		plants = []
+		for plant in self.planted_flowers:
+			spot_pos = getattr(plant, "_spot_pos", None)
+			zone = getattr(plant, "_zone", None)
+			zone_index = self.maps.zones.index(zone) if zone in self.maps.zones else None
+			plants.append({
+				"flower_name": plant.flower_name,
+				"growth_stage": plant.growth_stage,
+				"age": plant.age,
+				"spot_pos": (spot_pos.x, spot_pos.y, spot_pos.z) if spot_pos is not None else None,
+				"zone_index": zone_index,
+			})
+		return plants
+
+	def restore_planted_flowers(self, plant_states):
+		for plant_state in plant_states:
+			spot_pos = plant_state.get("spot_pos")
+			if spot_pos is None:
+				continue
+			zone_index = plant_state.get("zone_index")
+			zone = None
+			if zone_index is not None and 0 <= zone_index < len(self.maps.zones):
+				zone = self.maps.zones[zone_index]
+			self._restore_plant(
+				plant_state["flower_name"],
+				spot_pos,
+				zone,
+				plant_state.get("growth_stage", 0),
+				plant_state.get("age", 0.0),
+			)
+
+	def _restore_plant(self, flower_name, spot_pos, zone, growth_stage, age):
+		plant = ursina.Entity(position=ursina.Vec3(spot_pos[0], 1.8, spot_pos[2]), collider="box")
+		sprout_texture = self.texture_paths.get("Pousse")
+		flower_texture = self.texture_paths.get(flower_name)
+		plant1 = ursina.Entity(
+			parent=plant,
+			model="quad",
+			texture=sprout_texture,
+			color=ursina.color.white,
+			scale=(4, 4, 4),
+			rotation_y=45,
+			double_sided=True,
+			shader=ursina.shaders.lit_with_shadows_shader,
+		)
+		plant2 = ursina.Entity(
+			parent=plant,
+			model="quad",
+			texture=sprout_texture,
+			color=ursina.color.white,
+			scale=(4, 4, 4),
+			rotation_y=135,
+			double_sided=True,
+			shader=ursina.shaders.lit_with_shadows_shader,
+		)
+
+		plant.flower_name = flower_name
+		plant.growth_stage = growth_stage
+		plant.age = age
+		plant._quads = [plant1, plant2]
+		plant._spot_pos = ursina.Vec3(spot_pos[0], spot_pos[1], spot_pos[2])
+		plant._zone = zone
+
+		if zone is not None:
+			self.maps.register_occupied_spot(zone, plant._spot_pos)
+			for spot in list(zone.planting_spots):
+				if (
+					abs(spot.position.x - plant._spot_pos.x) < 0.01
+					and abs(spot.position.y - plant._spot_pos.y) < 0.01
+					and abs(spot.position.z - plant._spot_pos.z) < 0.01
+				):
+					try:
+						ursina.destroy(spot)
+						zone.planting_spots.remove(spot)
+					except Exception:
+						pass
+
+		rarity = self.fleurs[flower_name].rareté
+		plant.growth_delay = {1: 30, 2: 90, 3: 130, 4: 200}.get(rarity, 60)
+
+		if growth_stage == 1:
+			for quad in plant._quads:
+				quad.texture = flower_texture
+
+			def harvest():
+				if plant not in self.planted_flowers:
+					return
+
+				plant_zone = getattr(plant, "_zone", None)
+				if plant_zone is not None and getattr(plant, "_spot_pos", None) is not None:
+					self.maps.release_occupied_spot(plant_zone, plant._spot_pos)
+
+				self.inventory.add_item(plant.flower_name)
+				self.matrice_inventaire()
+				print(f"'{plant.flower_name}' récoltée et ajoutée à l'inventaire !")
+
+				if plant_zone is not None and getattr(plant_zone, "is_watered", False):
+					self.maps.add_planting_spot(plant_zone, plant._spot_pos)
+
+				if plant in self.planted_flowers:
+					self.planted_flowers.remove(plant)
+				self.destroy(plant)
+
+			plant.on_click = harvest
+
+		self.planted_flowers.append(plant)
+
+		return plant
+
 	def build_flower_name_from_item(self, item_name):
 		if not item_name:
 			return None

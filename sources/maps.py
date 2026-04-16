@@ -12,6 +12,7 @@ zones = []
 
 DRY_BROWN = ursina.color.rgb(139 / 255, 69 / 255, 19 / 255)
 WATERED_BROWN = ursina.color.rgb(80 / 255, 40 / 255, 0 / 255)
+ZONE_REWATER_TIMEOUT = 60
 
 # Purchase panel
 purchase_panel = None
@@ -93,6 +94,64 @@ def mark_zone_watered(zone):
     zone.is_watered = True
     zone.grown_in_cycle = 0
     zone.dry_since = None
+
+
+def serialize_zones():
+    zone_states = []
+    for zone in zones:
+        _ensure_zone_state(zone)
+        if zone.color == ursina.color.gray:
+            status = "locked"
+        elif getattr(zone, "is_watered", False):
+            status = "watered"
+        else:
+            status = "dry"
+
+        dry_elapsed = None
+        dry_timer_remaining = None
+        if status == "dry" and getattr(zone, "dry_since", None) is not None:
+            dry_elapsed = ursina.time.time() - zone.dry_since
+            dry_timer_remaining = max(0.0, ZONE_REWATER_TIMEOUT - dry_elapsed)
+
+        zone_states.append({
+            "status": status,
+            "grown_in_cycle": getattr(zone, "grown_in_cycle", 0),
+            "dry_elapsed": dry_elapsed,
+            "dry_timer_remaining": dry_timer_remaining,
+        })
+    return zone_states
+
+
+def restore_zone_states(zone_states):
+    for zone, state in zip(zones, zone_states):
+        _ensure_zone_state(zone)
+
+        for spot in list(zone.planting_spots):
+            try:
+                ursina.destroy(spot)
+            except Exception:
+                pass
+        zone.planting_spots.clear()
+
+        status = state.get("status", "locked")
+        if status == "locked":
+            zone.color = ursina.color.gray
+            zone.is_watered = False
+            zone.grown_in_cycle = 0
+            zone.dry_since = None
+        elif status == "dry":
+            zone.color = DRY_BROWN
+            zone.is_watered = False
+            zone.grown_in_cycle = state.get("grown_in_cycle", 0)
+            dry_timer_remaining = state.get("dry_timer_remaining")
+            if dry_timer_remaining is not None:
+                zone.dry_since = ursina.time.time() - max(0.0, ZONE_REWATER_TIMEOUT - dry_timer_remaining)
+            else:
+                dry_elapsed = state.get("dry_elapsed")
+                zone.dry_since = ursina.time.time() - dry_elapsed if dry_elapsed is not None else None
+        elif status == "watered":
+            mark_zone_watered(zone)
+            create_planting_spots(zone)
 
 
 def create_planting_spots(zone):
