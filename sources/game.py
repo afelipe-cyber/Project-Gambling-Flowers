@@ -10,7 +10,7 @@ import Joueur
 import modele3d
 import fleurs as fleurs_logic
 from Objets import arrosoirs, fleurs, graines, texture_paths
-import textures.sauvegarde as sauvegarde
+import sauvegarde
 
 
 class GameController:
