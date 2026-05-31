@@ -11,5 +11,3 @@ controller = game.GameController()
 controller.setup()
 
 app.run()
-
-"coucpou"
